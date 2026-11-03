@@ -187,7 +187,7 @@ export default function Home() {
   async function discoverJobs(event: FormEvent<HTMLFormElement>) {
     event.preventDefault(); setMessage("");
     try {
-      const response = await fetch(`${API}/api/v1/discovery/boards`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(discoveryDraft) });
+      const response = await fetch(`${API}/api/v1/discovery/boards`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ provider: discoveryDraft.provider, company_slug: discoveryDraft.company_slug }) });
       const data = await response.json();
       if (!response.ok) throw new Error(data.detail || "Could not save company board");
       setMessage(`${data.provider} board “${data.company_slug}” added to your watchlist.`);
