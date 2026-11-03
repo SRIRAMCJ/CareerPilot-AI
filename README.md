@@ -11,6 +11,7 @@ A local-first personal career workspace for discovering jobs, matching opportuni
 - Manual job capture, local search, duplicate detection, and explainable matching with location, work-mode, and salary eligibility blockers.
 - Application tracker with statuses, notes, next actions, follow-up dates, and original job-page links.
 - Per-application DOCX resume and cover-letter draft generation from saved profile facts.
+- Optional local Ollama cover-letter drafting; all other core workflows work without a model.
 - Interview and assessment scheduling with timezone-aware ICS export and calendar reminder alarms.
 - Windows setup and local launch scripts.
 
@@ -46,7 +47,7 @@ For manual setup, troubleshooting, daily scanning, and tests, read [docs/DEVELOP
 | LinkedIn, Naukri, Indeed, Foundit, Google Jobs | Unavailable | No approved connector configured |
 | Gmail and recruiter email | Unavailable | OAuth and email workflows not implemented |
 | Google Calendar | Partial | ICS export supported; direct Calendar OAuth/sync not implemented |
-| Local LLM | Optional future integration | Current matching and document generation do not require a model |
+| Local LLM | Partial | Optional loopback-only Ollama cover-letter drafts; deterministic workflows work without a model |
 
 ## Privacy and safety
 
