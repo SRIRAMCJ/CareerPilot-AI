@@ -11,6 +11,7 @@ from app.core.audit_database import record_event
 from app.core.config import get_settings
 from app.core.database import read_profile
 from app.core.jobs_database import get_job
+from app.core.submission_database import claim_submission_attempt, finish_submission_attempt, get_submission_attempt
 
 router = APIRouter(prefix="/api/v1/browser", tags=["browser-assisted applications"])
 _PAGES: dict[int, object] = {}
@@ -158,6 +159,14 @@ async def prepare_application_form(application_id: int) -> dict:
     }
 
 
+@router.get("/applications/{application_id}/submission")
+def submission_status(application_id: int) -> dict:
+    if not get_application(application_id):
+        raise HTTPException(status_code=404, detail="Application tracker not found.")
+    attempt = get_submission_attempt(application_id)
+    return {"application_id": application_id, "attempt": attempt}
+
+
 @router.post("/applications/{application_id}/submit")
 async def submit_application(application_id: int, request: SubmissionConfirmation) -> dict:
     settings = get_settings()
@@ -165,6 +174,9 @@ async def submit_application(application_id: int, request: SubmissionConfirmatio
         raise HTTPException(status_code=403, detail="Application submission is disabled. Set APPLICATION_SUBMISSION_ENABLED=true after reviewing the safety guidance.")
     if request.confirmation != "SUBMIT APPLICATION":
         raise HTTPException(status_code=400, detail="Type SUBMIT APPLICATION to confirm this external action.")
+    application = get_application(application_id)
+    if not application:
+        raise HTTPException(status_code=404, detail="Application tracker not found.")
     page = _PAGES.get(application_id)
     if page is None or await page.is_closed():
         raise HTTPException(status_code=409, detail="Prepare the application form in the visible browser first.")
@@ -174,15 +186,39 @@ async def submit_application(application_id: int, request: SubmissionConfirmatio
         ).last
         if await button.count() == 0 or not await button.is_visible() or not await button.is_enabled():
             raise HTTPException(status_code=409, detail="No unambiguous enabled submit button was found.")
-        await button.click(timeout=10000)
-        record_event("application.submission_clicked", "application", application_id,
-                     {"action": "explicit_user_confirmation"})
-        return {
-            "status": "submit_action_clicked",
-            "message": "The submit control was clicked. Verify the website's confirmation and update the application status manually.",
-            "automatic_success_claimed": False,
-        }
     except HTTPException:
         raise
     except Exception as error:
-        raise HTTPException(status_code=502, detail="The application submit control could not be activated.") from error
+        raise HTTPException(status_code=502, detail="Could not inspect the application submit control.") from error
+
+    attempt = claim_submission_attempt(application_id, page.url)
+    if attempt is None:
+        existing = get_submission_attempt(application_id)
+        raise HTTPException(
+            status_code=409,
+            detail={
+                "message": "A submission attempt is already recorded. Duplicate clicks are blocked.",
+                "attempt": existing,
+                "next_step": "Check the employer website and reconcile the result manually before taking any further action.",
+            },
+        )
+    record_event("application.submission_attempt_started", "application", application_id,
+                 {"attempt_id": attempt["id"], "page_url": page.url})
+    try:
+        await button.click(timeout=10000)
+        finish_submission_attempt(attempt["id"], "clicked")
+        record_event("application.submission_clicked", "application", application_id,
+                     {"attempt_id": attempt["id"], "action": "explicit_user_confirmation", "page_url": page.url})
+        return {
+            "status": "submit_action_clicked", "attempt": get_submission_attempt(application_id),
+            "message": "The submit control was clicked. Verify the employer website's confirmation; CareerPilot does not mark this as applied automatically.",
+            "automatic_success_claimed": False,
+        }
+    except Exception as error:
+        finish_submission_attempt(attempt["id"], "outcome_unknown")
+        record_event("application.submission_outcome_unknown", "application", application_id,
+                     {"attempt_id": attempt["id"], "page_url": page.url})
+        raise HTTPException(
+            status_code=502,
+            detail="The browser did not confirm whether the submit action completed. The attempt is locked to prevent a duplicate. Check the employer site and reconcile manually.",
+        ) from error
