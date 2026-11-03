@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Query, status
 
-from app.core.applications_database import create_application, list_applications, update_application
+from app.core.applications_database import create_application, get_application, list_applications, update_application
 from app.core.audit_database import record_event
 from app.schemas.application import ApplicationCreate, ApplicationUpdate
 
@@ -26,8 +26,14 @@ def get_applications(
 
 @router.patch("/{application_id}")
 def patch_application(application_id: int, item: ApplicationUpdate) -> dict:
-    updated = update_application(application_id, item)
+    previous = get_application(application_id)
+    if previous is None:
+        raise HTTPException(status_code=404, detail="Application tracker not found.")
+    try:
+        updated = update_application(application_id, item)
+    except ValueError as error:
+        raise HTTPException(status_code=409, detail=str(error)) from error
     if updated is None:
         raise HTTPException(status_code=404, detail="Application tracker not found.")
-    record_event("application.updated", "application", application_id, {"status": updated["status"], "updated_fields": list(item.model_fields_set)})
+    record_event("application.updated", "application", application_id, {"from_status": previous["status"], "to_status": updated["status"], "updated_fields": list(item.model_fields_set)})
     return updated
