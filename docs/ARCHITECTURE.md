@@ -19,15 +19,15 @@ CareerPilot AI is a local-first career workflow application. The foundation shou
 2. **Discovery adapters** — independently maintained connectors for approved job sources.
 3. **Normalization and deduplication** — deterministic canonical job records.
 4. **Eligibility and scoring** — explainable rules; hard requirements override weighted scores.
-5. **Application materials** — versioned resume and cover-letter artifacts grounded in profile facts.
-6. **Application workflow** — explicit state machine, safe browser adapter boundary, and confirmation evidence.
+5. **Application materials** — generated DOCX drafts grounded in profile facts, with optional local Ollama cover-letter drafting.
+6. **Application workflow** — current status tracker; formal state machine, browser adapters, and submission evidence remain future work.
 7. **Communication** — optional Gmail integration with least-privilege OAuth.
 8. **Scheduling** — optional Google Calendar integration with timezone-aware events.
 9. **Dashboard and analytics** — status, audit trail, and measurable outcomes.
 
 ## Provider-independent AI
 
-Define an AI provider interface only when a feature requires generation or semantic interpretation. Start with deterministic implementations and tests. Add Ollama or a cloud provider behind the same interface later. Provider failure must never bypass eligibility, consent, or submission rules.
+Current matching and document templates are deterministic. An optional Ollama integration drafts cover letters through a loopback-only endpoint. A broader provider abstraction and any cloud AI support remain future work. Provider failure must never bypass eligibility, consent, or submission rules.
 
 ## Planned application state machine
 
