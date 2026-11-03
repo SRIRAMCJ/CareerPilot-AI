@@ -3,6 +3,8 @@ from uuid import uuid4
 
 from docx import Document
 
+from app.core.config import get_settings
+
 
 def generate_application_pack(profile: dict, job: dict, output_dir: Path) -> dict[str, str]:
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -74,9 +76,8 @@ def generate_application_pack(profile: dict, job: dict, output_dir: Path) -> dic
 
 
 def generated_material_directory() -> Path:
-    import os
-
-    configured = os.getenv("CAREERPILOT_GENERATED_DIR")
+    
+    configured = get_settings().careerpilot_generated_dir
     directory = Path(configured).expanduser() if configured else Path.home() / ".careerpilot" / "generated"
     directory.mkdir(parents=True, exist_ok=True)
     return directory
