@@ -57,7 +57,7 @@ The backend requests:
 
 - These connectors do not cover every employer or job platform.
 - LinkedIn, Naukri, Indeed, Foundit, and Google Jobs are not connected. CareerPilot will not scrape authenticated pages, bypass CAPTCHAs, defeat rate limits, or evade access controls.
-- Company name is currently inferred from the board slug. Verify it when preparing applications.
+- Greenhouse, Lever, and Ashby company names are currently inferred from the board slug; Workable returns a company name in its public feed. Verify company details before preparing applications.
 - Extracted skills are keyword hints, not a complete or authoritative requirements analysis.
 - A public listing may change or disappear; verify the original posting before applying.
 - Fetch requests use fixed HTTPS provider hosts and validated board slugs. Do not change this to accept arbitrary URLs; that would introduce server-side request forgery risk.
