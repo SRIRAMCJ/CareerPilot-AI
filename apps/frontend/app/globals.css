@@ -146,3 +146,14 @@ button { cursor: pointer; }
 .application-link a { color: #3974a4; }
 
 .match-blockers { color: #a45e47 !important; font-weight: 700; }
+
+.watchlist-heading { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin: 17px 0 10px; }
+.watchlist-heading strong { color: #40566b; font-size: 11px; }
+.watchlist-filter { display: grid; gap: 6px; color: #748392; font-size: 9px; }
+.watchlist-filter input { width: 100%; border: 1px solid #e1e7ec; border-radius: 7px; padding: 9px 10px; color: #40566b; font-size: 10px; }
+.watchlist { display: grid; gap: 7px; margin: 10px 0 15px; }
+.watchlist-item { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid #edf0f3; }
+.watchlist-item > div { display: grid; gap: 3px; }
+.watchlist-item strong { color: #42566a; font-size: 10px; }
+.watchlist-item small { color: #8b99a6; font-size: 9px; text-transform: capitalize; }
+.watchlist-heading button:disabled { opacity: .5; cursor: not-allowed; }
