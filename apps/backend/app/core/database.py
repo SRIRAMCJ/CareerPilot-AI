@@ -28,6 +28,30 @@ def initialize_database(path: Path | None = None) -> None:
             )
             """
         )
+        connection.execute(
+            """
+            CREATE TABLE IF NOT EXISTS job_listings (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                title TEXT NOT NULL,
+                company TEXT NOT NULL,
+                location TEXT,
+                work_mode TEXT,
+                job_type TEXT,
+                source TEXT NOT NULL,
+                source_job_id TEXT,
+                url TEXT,
+                description TEXT NOT NULL DEFAULT '',
+                required_skills TEXT NOT NULL DEFAULT '[]',
+                salary_min INTEGER,
+                salary_max INTEGER,
+                salary_currency TEXT NOT NULL DEFAULT 'INR',
+                posted_date TEXT,
+                status TEXT NOT NULL DEFAULT 'discovered',
+                created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE(source, source_job_id)
+            )
+            """
+        )
 
 
 def save_profile(profile: CandidateProfile, path: Path | None = None) -> dict[str, Any]:
@@ -69,28 +93,3 @@ def delete_profile(path: Path | None = None) -> bool:
     with sqlite3.connect(target) as connection:
         cursor = connection.execute("DELETE FROM candidate_profile WHERE id = 1")
     return cursor.rowcount > 0
-
-        connection.execute(
-            """
-            CREATE TABLE IF NOT EXISTS job_listings (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                title TEXT NOT NULL,
-                company TEXT NOT NULL,
-                location TEXT,
-                work_mode TEXT,
-                job_type TEXT,
-                source TEXT NOT NULL,
-                source_job_id TEXT,
-                url TEXT,
-                description TEXT NOT NULL DEFAULT '',
-                required_skills TEXT NOT NULL DEFAULT '[]',
-                salary_min INTEGER,
-                salary_max INTEGER,
-                salary_currency TEXT NOT NULL DEFAULT 'INR',
-                posted_date TEXT,
-                status TEXT NOT NULL DEFAULT 'discovered',
-                created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                UNIQUE(source, source_job_id)
-            )
-            """
-        )
