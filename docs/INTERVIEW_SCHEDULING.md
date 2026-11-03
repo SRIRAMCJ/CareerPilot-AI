@@ -11,7 +11,7 @@ CareerPilot supports a local event planner for interviews, recruiter calls, tech
 - Export an event as an `.ics` calendar file for import into Google Calendar, Outlook, Apple Calendar, or another calendar client.
 - Edit and delete scheduled events.
 
-The stored reminder preference is metadata only in this release; it does not run a background notification service. Calendar OAuth and automatic event creation are future integrations.
+The reminder preference is exported as an iCalendar `VALARM` so the destination calendar can notify you after import. CareerPilot itself does not run a background notification service. Calendar OAuth and automatic event creation are future integrations.
 
 ## API
 
