@@ -44,11 +44,13 @@
 - [x] Basic profile field filling in visible browser and a typed, disabled-by-default submit confirmation
 - [x] Original job-page links and a ready-to-submit review status
 - [x] Local audit event log for profile, discovery, job, application, resume, materials, and interview actions
-- [x] Application status transition state machine with invalid-transition rejection\n- [ ] Tamper-evident audit trail and submission confirmation evidence
+- [x] Application status transition state machine with invalid-transition rejection
+- [x] Atomic one-attempt-per-application submission lock and attempt status endpoint
+- [x] Submission attempt audit events and unknown-outcome duplicate protection
+- [ ] Tamper-evident audit trail and employer confirmation evidence
 - [x] Visible local Playwright session support with a dedicated browser profile
 - [ ] Per-platform permitted application adapters
-- [ ] Submission idempotency and confirmation evidence
-- [ ] Review gates for sensitive declarations
+- [ ] Human review gates for sensitive declarations
 
 ## Phase 7 — Communication and scheduling
 - [x] Local interview and assessment scheduler
