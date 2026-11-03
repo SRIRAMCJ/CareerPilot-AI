@@ -37,6 +37,8 @@ export default function Home() {
   const [message, setMessage] = useState("");
   const [apiOnline, setApiOnline] = useState(false);
   const [jobDraft, setJobDraft] = useState({ title: "", company: "", location: "Chennai", work_mode: "Hybrid", source: "manual", description: "", required_skills: "" });
+  const [discoveryDraft, setDiscoveryDraft] = useState({ provider: "greenhouse", company_slug: "", query: "", limit: 50 });
+  const [discovering, setDiscovering] = useState(false);
 
   const loadProfile = useCallback(async () => {
     try {
@@ -102,6 +104,18 @@ export default function Home() {
       setJobDraft({ title: "", company: "", location: "Chennai", work_mode: "Hybrid", source: "manual", description: "", required_skills: "" });
       setMessage("Job saved to your local opportunity list."); await loadJobs();
     } catch (error) { setMessage(error instanceof Error ? error.message : "Could not save job."); }
+  }
+
+  async function discoverJobs(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault(); setMessage(""); setDiscovering(true);
+    try {
+      const response = await fetch(`${API}/api/v1/discovery/search`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(discoveryDraft) });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.detail || "Job source search failed");
+      setMessage(`Fetched ${data.fetched} listings; saved ${data.saved} new jobs; skipped ${data.duplicates} duplicates.`);
+      await loadJobs();
+    } catch (error) { setMessage(error instanceof Error ? error.message : "Discovery failed."); }
+    finally { setDiscovering(false); }
   }
 
   async function trackJob(jobId: number) {
@@ -204,6 +218,14 @@ export default function Home() {
               <div className="job-actions"><span>{job.work_mode || "Work mode unspecified"}</span><button className="small-button" onClick={() => void scoreJob(job.id)}>Calculate match</button><button className="small-button" onClick={() => void trackJob(job.id)}>Track job</button>{job.url && <a href={job.url} target="_blank" rel="noreferrer">Open listing ↗</a>}</div>
               {matches[job.id] && <div className="match-result"><div className="score"><strong>{matches[job.id].score}</strong><small>/ 100 match</small></div><div><strong>{matches[job.id].decision.replace("_"," ")}</strong><p>{matches[job.id].reasons.join(" · ")}</p><p>Matched: {matches[job.id].matched_skills.join(", ") || "None"} · Gaps: {matches[job.id].missing_skills.join(", ") || "None"}</p></div></div>}
             </article>)}</div>}
+        </section><section className="panel"><span className="eyebrow">PUBLIC JOB SOURCES</span><h3>Discover jobs</h3><p className="form-intro">Search public company boards on Greenhouse or Lever. Enter the board slug, not a full URL.</p>
+          <form className="profile-form discovery-form" onSubmit={discoverJobs}>
+            <label>Job source<select value={discoveryDraft.provider} onChange={e => setDiscoveryDraft({...discoveryDraft,provider:e.target.value})}><option value="greenhouse">Greenhouse</option><option value="lever">Lever</option></select></label>
+            <label>Company board slug<input required value={discoveryDraft.company_slug} onChange={e => setDiscoveryDraft({...discoveryDraft,company_slug:e.target.value})} placeholder="e.g. openai" /></label>
+            <label>Keyword filter (optional)<input value={discoveryDraft.query} onChange={e => setDiscoveryDraft({...discoveryDraft,query:e.target.value})} placeholder="AI Engineer, Python" /></label>
+            <button className="submit-button" type="submit" disabled={discovering}>{discovering ? "Searching public board…" : "Search and save jobs"}</button>
+          </form>
+          <div className="source-disclaimer">Only public board endpoints are queried. LinkedIn, Naukri and Indeed integrations are not enabled; no login, scraping, or anti-bot bypass is used.</div>
         </section><section className="panel"><span className="eyebrow">MANUAL JOB CAPTURE</span><h3>Add an opportunity</h3><p className="form-intro">Save a role you found on a job board or company career page.</p>
           <form className="profile-form" onSubmit={addJob}><label>Job title<input required value={jobDraft.title} onChange={e => setJobDraft({...jobDraft,title:e.target.value})} /></label>
             <label>Company<input required value={jobDraft.company} onChange={e => setJobDraft({...jobDraft,company:e.target.value})} /></label>
