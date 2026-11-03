@@ -1,8 +1,8 @@
-import os
 import sqlite3
 from pathlib import Path
 
 from app.core import database
+from app.core.config import get_settings
 
 
 def create_resume_record(
@@ -49,7 +49,7 @@ def delete_resume_record(resume_id: int) -> dict | None:
 
 
 def local_resume_directory() -> Path:
-    configured = os.getenv("CAREERPILOT_RESUME_DIR")
+    configured = get_settings().careerpilot_resume_dir
     directory = Path(configured).expanduser() if configured else Path.home() / ".careerpilot" / "resumes"
     directory.mkdir(parents=True, exist_ok=True)
     return directory
