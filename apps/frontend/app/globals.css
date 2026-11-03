@@ -144,3 +144,5 @@ button { cursor: pointer; }
 
 .application-link { margin: 12px 0 0; font-size: 10px; }
 .application-link a { color: #3974a4; }
+
+.match-blockers { color: #a45e47 !important; font-weight: 700; }
