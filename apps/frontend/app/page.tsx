@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, type FormEvent } from "react";
 
 const API = process.env.NEXT_PUBLIC_API_BASE_URL || "http://127.0.0.1:8000";
 
@@ -165,7 +165,7 @@ export default function Home() {
           <section className="metric-grid"><article className="metric-card"><span>Jobs saved</span><strong>{jobs.length}</strong><small>Stored in your local database</small></article>
             <article className="metric-card"><span>Profile status</span><strong>{profileExists ? "Ready" : "—"}</strong><small>{profileExists ? "Candidate profile saved" : "Profile setup required"}</small></article>
             <article className="metric-card"><span>Matches scored</span><strong>{Object.keys(matches).length}</strong><small>Explainable fit assessments</small></article>
-            <article className="metric-card"><span>Applications</span><strong>0</strong><small>Submission workflow disabled</small></article></section>
+            <article className="metric-card"><span>Applications</span><strong>{applications.length}</strong><small>Tracked opportunities · no auto submission</small></article></section>
           <section className="lower-grid"><article className="panel"><span className="eyebrow">YOUR WORKFLOW</span><h3>Build your career pipeline</h3>
             {[["01","Complete your profile","Add verified skills, experience, and role preferences."],["02","Save job opportunities","Add jobs manually while source connectors are being built."],["03","Review match explanations","See matched skills, gaps, and fit reasons."],["04","Prepare applications","Keep submissions candidate-controlled and truthful."]].map(([n,t,d]) =>
               <div className="step" key={n}><span className="step-number">{n}</span><div><strong>{t}</strong><p>{d}</p></div><span className="step-state">READY</span></div>)}
