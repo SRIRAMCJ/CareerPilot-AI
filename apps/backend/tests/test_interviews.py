@@ -41,3 +41,20 @@ def test_interview_requires_timezone_aware_dates():
         "starts_at": "2026-11-12T10:00:00", "ends_at": "2026-11-12T11:00:00",
     })
     assert response.status_code == 422
+
+
+def test_interview_update_cannot_create_negative_duration(tmp_path, monkeypatch):
+    monkeypatch.setattr(database, "database_path", lambda: tmp_path / "invalid-interview.db")
+    job = client.post("/api/v1/jobs", json={
+        "title": "AI Engineer", "company": "Example Labs", "source": "manual"
+    }).json()
+    application = client.post("/api/v1/applications", json={"job_id": job["id"]}).json()
+    event = client.post("/api/v1/interviews", json={
+        "application_id": application["id"], "title": "Interview",
+        "starts_at": "2026-11-12T10:00:00+05:30",
+        "ends_at": "2026-11-12T11:00:00+05:30",
+    }).json()
+    response = client.patch(f"/api/v1/interviews/{event['id']}", json={
+        "ends_at": "2026-11-12T09:00:00+05:30"
+    })
+    assert response.status_code == 422
