@@ -33,7 +33,7 @@ def _skills(text: str) -> list[str]:
     lowered = text.casefold()
     return [
         skill for skill in vocabulary
-        if re.search(rf"(?<![\\w+#.]){re.escape(skill.casefold())}(?![\\w+#.])", lowered)
+        if re.search(rf"(?<![\w+#.]){re.escape(skill.casefold())}(?![\w+#.])", lowered)
     ]
 
 
