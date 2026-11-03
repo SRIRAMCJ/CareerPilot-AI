@@ -18,7 +18,7 @@ type Match = { score: number; decision: string; matched_skills: string[]; missin
 type Application = { id: number; job_id: number; status: string; notes: string; next_action?: string | null; follow_up_date?: string | null; job_title: string; company: string };
 type ResumeItem = { id: number; filename: string; file_type: string; file_size: number; uploaded_at: string };
 type ResumeResult = ResumeItem & { extracted_text_length: number; extracted_skills: string[]; extracted_email?: string | null; extracted_phone?: string | null };
-type Interview = { id: number; application_id: number; title: string; event_type: string; starts_at: string; ends_at: string; timezone_name: string; meeting_url?: string | null; notes: string; job_title: string; company: string };
+type Interview = { id: number; application_id: number; title: string; event_type: string; starts_at: string; ends_at: string; timezone_name: string; meeting_url?: string | null; notes: string; reminder_minutes: number; job_title: string; company: string };
 const emptyProfile: Profile = {
   full_name: "", email: "", phone: "", location: "", headline: "", professional_summary: "",
   current_role: "", target_roles: [], preferred_locations: [], preferred_work_modes: [],
@@ -37,7 +37,7 @@ export default function Home() {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [applications, setApplications] = useState<Application[]>([]);
   const [interviews, setInterviews] = useState<Interview[]>([]);
-  const [interviewDraft, setInterviewDraft] = useState({ application_id: "", title: "", event_type: "interview", starts_at: "", ends_at: "", meeting_url: "", notes: "" });
+  const [interviewDraft, setInterviewDraft] = useState({ application_id: "", title: "", event_type: "interview", starts_at: "", ends_at: "", meeting_url: "", notes: "", reminder_minutes: 30 });
   const [materialLinks, setMaterialLinks] = useState<Record<number, string>>({});
   const [resumes, setResumes] = useState<ResumeItem[]>([]);
   const [resumeResult, setResumeResult] = useState<ResumeResult | null>(null);
@@ -189,7 +189,7 @@ export default function Home() {
       const response = await fetch(`${API}/api/v1/interviews`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
       const data = await response.json();
       if (!response.ok) throw new Error(data.detail?.[0]?.msg || data.detail || "Could not schedule event");
-      setInterviewDraft({ application_id: "", title: "", event_type: "interview", starts_at: "", ends_at: "", meeting_url: "", notes: "" });
+      setInterviewDraft({ application_id: "", title: "", event_type: "interview", starts_at: "", ends_at: "", meeting_url: "", notes: "", reminder_minutes: 30 });
       setMessage("Interview or assessment added to your local calendar."); await loadInterviews();
     } catch (error) { setMessage(error instanceof Error ? error.message : "Scheduling failed."); }
   }
@@ -344,7 +344,7 @@ export default function Home() {
             <div className="job-list">{interviews.map(item => <article className="job-card" key={item.id}><div className="job-card-top"><div><strong>{item.title}</strong><p>{item.job_title} · {item.company}</p></div><span className="job-source">{item.event_type.replace("_"," ")}</span></div>
               <div className="interview-time">{new Date(item.starts_at).toLocaleString()} – {new Date(item.ends_at).toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"})} <span>{item.timezone_name}</span></div>
               {item.notes && <p className="application-note">{item.notes}</p>}
-              <div className="job-actions"><span>Reminder preference: {30} min before</span><a href={`${API}/api/v1/interviews/${item.id}/calendar.ics`}>Add to calendar ↗</a>{item.meeting_url && <a href={item.meeting_url} target="_blank" rel="noreferrer">Join meeting ↗</a>}</div>
+              <div className="job-actions"><span>Reminder preference: {item.reminder_minutes} min before</span><a href={`${API}/api/v1/interviews/${item.id}/calendar.ics`}>Add to calendar ↗</a>{item.meeting_url && <a href={item.meeting_url} target="_blank" rel="noreferrer">Join meeting ↗</a>}</div>
             </article>)}</div>}
         </section><section className="panel"><span className="eyebrow">SCHEDULE AN EVENT</span><h3>New interview or test</h3>
           {applications.length === 0 ? <p className="form-intro">Track a job first in Job discovery or Applications.</p> : <form className="profile-form" onSubmit={scheduleInterview}>
@@ -354,6 +354,7 @@ export default function Home() {
             <label>Start date and time<input required type="datetime-local" value={interviewDraft.starts_at} onChange={e => setInterviewDraft({...interviewDraft,starts_at:e.target.value})} /></label>
             <label>End date and time<input required type="datetime-local" value={interviewDraft.ends_at} onChange={e => setInterviewDraft({...interviewDraft,ends_at:e.target.value})} /></label>
             <label>Meeting URL (optional)<input type="url" value={interviewDraft.meeting_url} onChange={e => setInterviewDraft({...interviewDraft,meeting_url:e.target.value})} placeholder="https://..." /></label>
+            <label>Calendar reminder (minutes before)<input type="number" min="0" max="10080" value={interviewDraft.reminder_minutes} onChange={e => setInterviewDraft({...interviewDraft,reminder_minutes:Number(e.target.value)})} /></label>
             <label>Preparation notes<textarea rows={3} value={interviewDraft.notes} onChange={e => setInterviewDraft({...interviewDraft,notes:e.target.value})} /></label>
             <button className="submit-button" type="submit">Save interview event</button>
           </form>}
