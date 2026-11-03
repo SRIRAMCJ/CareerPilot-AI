@@ -31,7 +31,10 @@ def _skills(text: str) -> list[str]:
         "TensorFlow", "PyTorch", "Scikit-learn", "REST API", "GraphQL",
     ]
     lowered = text.casefold()
-    return [skill for skill in vocabulary if skill.casefold() in lowered]
+    return [
+        skill for skill in vocabulary
+        if re.search(rf"(?<![\\w+#.]){re.escape(skill.casefold())}(?![\\w+#.])", lowered)
+    ]
 
 
 def _work_mode(location: str, description: str) -> str | None:
