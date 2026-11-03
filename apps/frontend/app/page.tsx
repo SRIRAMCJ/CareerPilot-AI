@@ -35,6 +35,7 @@ export default function Home() {
   const [profileLoading, setProfileLoading] = useState(true);
   const [jobs, setJobs] = useState<Job[]>([]);
   const [applications, setApplications] = useState<Application[]>([]);
+  const [materialLinks, setMaterialLinks] = useState<Record<number, string>>({});
   const [resumes, setResumes] = useState<ResumeItem[]>([]);
   const [resumeResult, setResumeResult] = useState<ResumeResult | null>(null);
   const [resumeBusy, setResumeBusy] = useState(false);
@@ -173,6 +174,16 @@ export default function Home() {
     } catch (error) { setMessage(error instanceof Error ? error.message : "Could not track job."); }
   }
 
+  async function generateMaterials(id: number) {
+    try {
+      const response = await fetch(`${API}/api/v1/applications/${id}/materials`, { method: "POST" });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.detail || "Could not generate application materials");
+      setMaterialLinks(current => ({ ...current, [id]: data.download_url }));
+      setMessage("Resume and cover-letter draft generated from your saved profile facts.");
+    } catch (error) { setMessage(error instanceof Error ? error.message : "Material generation failed."); }
+  }
+
   async function updateApplicationStatus(id: number, status: string) {
     try {
       const response = await fetch(`${API}/api/v1/applications/${id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status }) });
@@ -296,7 +307,7 @@ export default function Home() {
         {section === "applications" && <section className="panel"><div className="panel-heading"><div><span className="eyebrow">APPLICATION TRACKER</span><h3>Your tracked opportunities <span className="count">{applications.length}</span></h3></div><button className="small-button" onClick={() => void loadApplications()}>Refresh</button></div>
           {applications.length === 0 ? <div className="empty-state"><strong>No tracked opportunities yet</strong><p>Open Job discovery and select “Track job” on an opportunity you want to follow.</p></div> :
             <div className="job-list">{applications.map(item => <article className="job-card" key={item.id}><div className="job-card-top"><div><strong>{item.job_title}</strong><p>{item.company}</p></div><span className="job-source">#{item.id}</span></div>
-              <div className="application-controls"><label>Status<select value={item.status} onChange={event => void updateApplicationStatus(item.id,event.target.value)}>{["saved","shortlisted","preparing","applied","assessment","interview","offer","rejected","withdrawn"].map(status => <option key={status} value={status}>{status.replace("_"," ")}</option>)}</select></label><span className="application-note">Status changes are recorded locally. This does not submit an application.</span></div>
+              <div className="application-controls"><label>Status<select value={item.status} onChange={event => void updateApplicationStatus(item.id,event.target.value)}>{["saved","shortlisted","preparing","applied","assessment","interview","offer","rejected","withdrawn"].map(status => <option key={status} value={status}>{status.replace("_"," ")}</option>)}</select></label><button className="small-button" onClick={() => void generateMaterials(item.id)}>Generate application pack</button>{materialLinks[item.id] && <a href={`${API}${materialLinks[item.id]}`} target="_blank" rel="noreferrer">Download DOCX ↗</a>}<span className="application-note">Draft uses saved profile facts. Review before sending; no application is submitted.</span></div>
             </article>)}</div>}
         </section>}
         {section === "interviews" && <section className="panel empty-state"><span className="eyebrow">INTERVIEW CENTER</span><h3>Interview scheduling is not connected.</h3><p>Calendar integration and reminders will be added after the application tracker. Candidate participation in interviews and assessments remains manual.</p></section>}
