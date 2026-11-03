@@ -1,6 +1,14 @@
-import pytest
+from types import SimpleNamespace
 
+import pytest
+from fastapi.testclient import TestClient
+
+from app.core import database
+from app.main import app
+from app.routers import materials
 from app.services.ai_provider import _local_ollama_endpoint
+
+client = TestClient(app)
 
 
 def test_ollama_endpoint_requires_loopback_host():
@@ -9,17 +17,6 @@ def test_ollama_endpoint_requires_loopback_host():
         _local_ollama_endpoint("https://example.com")
     with pytest.raises(ValueError):
         _local_ollama_endpoint("http://192.168.1.10:11434")
-
-
-from types import SimpleNamespace
-
-from fastapi.testclient import TestClient
-
-from app.core import database
-from app.main import app
-from app.routers import materials
-
-client = TestClient(app)
 
 
 def test_ai_cover_letter_endpoint_uses_configured_local_provider(tmp_path, monkeypatch):
