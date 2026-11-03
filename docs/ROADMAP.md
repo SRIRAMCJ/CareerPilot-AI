@@ -11,7 +11,7 @@
 ## Phase 2 — Candidate profile
 - [x] Profile schema and CRUD API
 - [x] Initial role, location, work-mode, and salary preferences
-- [ ] Resume upload/parsing with local storage
+- [x] PDF/DOCX resume upload, parsing, local storage, and deletion
 - [ ] Verified-fact provenance
 
 ## Phase 3 — Job discovery
@@ -29,8 +29,8 @@
 
 ## Phase 5 — Application preparation
 - [ ] Resume versioning
-- [ ] Cover letter generation behind AI provider abstraction
-- [ ] Factual claim validation
+- [x] Deterministic DOCX resume and cover-letter draft generation from verified profile facts
+- [x] Generation restricted to saved candidate facts; user review required
 - [ ] Application answer evidence mapping
 
 ## Phase 6 — Application workflow
@@ -44,6 +44,7 @@
 - [ ] Gmail OAuth with least privilege
 - [ ] Recruiter email classification
 - [ ] Draft replies
+- [x] Local interview/assessment scheduler with timezone-aware ICS export
 - [ ] Google Calendar OAuth
 - [ ] Timezone-aware scheduling and conflict detection
 
