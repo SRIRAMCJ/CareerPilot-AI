@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import get_settings
 from app.routers.applications import router as applications_router
+from app.routers.audit import router as audit_router
 from app.routers.discovery import router as discovery_router
 from app.routers.interviews import router as interviews_router
 from app.routers.jobs import router as jobs_router
@@ -21,6 +22,7 @@ app = FastAPI(
 app.include_router(profile_router)
 app.include_router(jobs_router)
 app.include_router(applications_router)
+app.include_router(audit_router)
 app.include_router(discovery_router)
 app.include_router(resumes_router)
 app.include_router(materials_router)
