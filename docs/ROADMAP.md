@@ -35,6 +35,7 @@
 - [x] Per-application DOCX resume and cover-letter draft generation from saved profile facts
 - [x] Factuality guardrails: no invented employers, dates, qualifications, metrics, or achievements
 - [x] Candidate review before using generated materials
+- [x] Optional loopback-only Ollama cover-letter drafting
 - [ ] Resume tailoring based on full parsed source-resume sections
 - [ ] Application answer evidence mapping
 
