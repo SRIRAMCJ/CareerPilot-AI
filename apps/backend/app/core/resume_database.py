@@ -1,3 +1,4 @@
+import os
 import sqlite3
 from pathlib import Path
 
@@ -48,8 +49,6 @@ def delete_resume_record(resume_id: int) -> dict | None:
 
 
 def local_resume_directory() -> Path:
-    import os
-
     configured = os.getenv("CAREERPILOT_RESUME_DIR")
     directory = Path(configured).expanduser() if configured else Path.home() / ".careerpilot" / "resumes"
     directory.mkdir(parents=True, exist_ok=True)
