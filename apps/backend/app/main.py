@@ -2,13 +2,13 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import get_settings
-from app.routers.profile import router as profile_router
-from app.routers.jobs import router as jobs_router
 from app.routers.applications import router as applications_router
 from app.routers.discovery import router as discovery_router
-from app.routers.resumes import router as resumes_router
-from app.routers.materials import router as materials_router
 from app.routers.interviews import router as interviews_router
+from app.routers.jobs import router as jobs_router
+from app.routers.materials import router as materials_router
+from app.routers.profile import router as profile_router
+from app.routers.resumes import router as resumes_router
 
 settings = get_settings()
 
