@@ -13,6 +13,8 @@ class Settings(BaseSettings):
     api_port: int = 8000
     frontend_origin: str = "http://localhost:3000"
     ai_provider: str = "none"
+    ollama_base_url: str = "http://127.0.0.1:11434"
+    ollama_model: str = ""
     gmail_enabled: bool = False
     google_calendar_enabled: bool = False
     browser_automation_enabled: bool = False
