@@ -1,7 +1,7 @@
 from fastapi.testclient import TestClient
 
 from app.core import database
-from app.services import materials_generator
+from app.routers import materials
 from app.main import app
 
 client = TestClient(app)
@@ -9,7 +9,7 @@ client = TestClient(app)
 
 def test_application_pack_is_generated_from_saved_facts(tmp_path, monkeypatch):
     monkeypatch.setattr(database, "database_path", lambda: tmp_path / "materials.db")
-    monkeypatch.setattr(materials_generator, "generated_material_directory", lambda: tmp_path / "generated")
+    monkeypatch.setattr(materials, "generated_material_directory", lambda: tmp_path / "generated")
 
     job = client.post("/api/v1/jobs", json={
         "title": "AI Engineer", "company": "Example Labs", "source": "manual"
