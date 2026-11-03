@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException, Query, status
 
+from app.core.audit_database import record_event
 from app.core.database import read_profile
 from app.core.jobs_database import create_job, get_job, list_jobs
 from app.schemas.job import JobListingCreate
@@ -12,7 +13,9 @@ router = APIRouter(prefix="/api/v1/jobs", tags=["jobs"])
 @router.post("", status_code=status.HTTP_201_CREATED)
 def add_job(job: JobListingCreate) -> dict:
     try:
-        return create_job(job)
+        created = create_job(job)
+        record_event("job.saved", "job_listing", created["id"], {"source": created["source"], "company": created["company"], "title": created["title"]})
+        return created
     except ValueError as error:
         raise HTTPException(status_code=409, detail=str(error)) from error
 
