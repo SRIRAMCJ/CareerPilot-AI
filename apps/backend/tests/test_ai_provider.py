@@ -43,4 +43,4 @@ def test_ai_cover_letter_endpoint_uses_configured_local_provider(tmp_path, monke
     response = client.post(f"/api/v1/applications/{application['id']}/cover-letter/ai")
     assert response.status_code == 200
     assert "Dear Hiring Team" in response.json()["draft"]
-    assert "review every claim" in response.json()["warning"].lower()
+    assert "verify every claim" in response.json()["warning"].lower()
