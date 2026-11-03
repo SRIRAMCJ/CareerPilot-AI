@@ -171,7 +171,7 @@ export default function IntegrationsPage() {
           <label>Gmail search query<input value={gmailQuery} onChange={e => setGmailQuery(e.target.value)} /></label>
           <button disabled={busy || !gmail.connected}>Search inbox</button>
         </form>
-        {messages.map(item => <div className="item" key={item.id}><strong>{item.subject}</strong><p className="muted">{item.from} · {item.date}</p><p>{item.snippet}</p><button onClick={() => { setRecipient(item.from.match(/<([^>]+)>/)?.[1] || item.from); setSubject(item.subject.startsWith("Re:") ? item.subject : `Re: ${item.subject}`); setBody(`\n\nOn your earlier email,\n`); }}>Reply draft</button></div>)}
+        {messages.map(item => <div className="item" key={item.id}><strong>{item.subject}</strong><p className="muted">{item.from} · {item.date}</p><p>{item.snippet}</p><button onClick={() => { setRecipient(item.from.match(/<([^>]+)>/)?.[1] || item.from); setSubject(item.subject.startsWith("Re:") ? item.subject : `Re: ${item.subject}`); setBody(`\n\nThank you for your email.\n`); setReplyThreadId(item.thread_id || ""); setReplyInReplyTo(item.message_id_header || ""); setReplyReferences([item.references_header, item.message_id_header].filter(Boolean).join(" ")); }}>Reply draft</button></div>)}
         <form onSubmit={saveDraft} style={{ marginTop: 20 }}>
           <h2>Compose recruiter email</h2>
           <label>To (comma-separated)<input value={recipient} onChange={e => setRecipient(e.target.value)} required /></label>
