@@ -16,6 +16,8 @@ type Job = {
 };
 type Match = { score: number; decision: string; matched_skills: string[]; missing_skills: string[]; reasons: string[] };
 type Application = { id: number; job_id: number; status: string; notes: string; next_action?: string | null; follow_up_date?: string | null; job_title: string; company: string };
+type ResumeItem = { id: number; filename: string; file_type: string; file_size: number; uploaded_at: string };
+type ResumeResult = ResumeItem & { extracted_text_length: number; extracted_skills: string[]; extracted_email?: string | null; extracted_phone?: string | null };
 const emptyProfile: Profile = {
   full_name: "", email: "", phone: "", location: "", headline: "", professional_summary: "",
   current_role: "", target_roles: [], preferred_locations: [], preferred_work_modes: [],
@@ -33,6 +35,9 @@ export default function Home() {
   const [profileLoading, setProfileLoading] = useState(true);
   const [jobs, setJobs] = useState<Job[]>([]);
   const [applications, setApplications] = useState<Application[]>([]);
+  const [resumes, setResumes] = useState<ResumeItem[]>([]);
+  const [resumeResult, setResumeResult] = useState<ResumeResult | null>(null);
+  const [resumeBusy, setResumeBusy] = useState(false);
   const [matches, setMatches] = useState<Record<number, Match>>({});
   const [message, setMessage] = useState("");
   const [apiOnline, setApiOnline] = useState(false);
@@ -58,6 +63,14 @@ export default function Home() {
     finally { setProfileLoading(false); }
   }, []);
 
+  const loadResumes = useCallback(async () => {
+    try {
+      const response = await fetch(`${API}/api/v1/resumes`);
+      if (!response.ok) throw new Error("Could not load resumes");
+      setResumes(await response.json());
+    } catch { /* Resume storage remains optional until the API is reachable. */ }
+  }, []);
+
   const loadApplications = useCallback(async () => {
     try {
       const response = await fetch(`${API}/api/v1/applications`);
@@ -78,7 +91,7 @@ export default function Home() {
     } catch { setApiOnline(false); }
   }, []);
 
-  useEffect(() => { void loadProfile(); void loadJobs(); void loadApplications(); }, [loadProfile, loadJobs, loadApplications]);
+  useEffect(() => { void loadProfile(); void loadJobs(); void loadApplications(); void loadResumes(); }, [loadProfile, loadJobs, loadApplications, loadResumes]);
 
   async function saveProfile(event: FormEvent<HTMLFormElement>) {
     event.preventDefault(); setMessage("");
@@ -92,6 +105,39 @@ export default function Home() {
       if (!response.ok) throw new Error(data.detail?.[0]?.msg || data.detail || "Profile could not be saved");
       setProfileExists(true); setMessage("Your profile was saved locally on this device.");
     } catch (error) { setMessage(error instanceof Error ? error.message : "Could not connect to the API."); }
+  }
+
+  async function uploadResume(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const input = event.currentTarget.elements.namedItem("resume") as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+    setResumeBusy(true); setResumeResult(null); setMessage("");
+    try {
+      const body = new FormData(); body.append("file", file);
+      const response = await fetch(`${API}/api/v1/resumes`, { method: "POST", body });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.detail || "Resume could not be parsed");
+      setResumeResult(data); setMessage("Resume stored locally. Review extracted facts before adding them to your profile.");
+      input.value = ""; await loadResumes();
+    } catch (error) { setMessage(error instanceof Error ? error.message : "Resume upload failed."); }
+    finally { setResumeBusy(false); }
+  }
+
+  async function deleteResume(id: number) {
+    try {
+      const response = await fetch(`${API}/api/v1/resumes/${id}`, { method: "DELETE" });
+      if (!response.ok) throw new Error("Could not delete resume");
+      setResumes(current => current.filter(item => item.id !== id));
+      setResumeResult(current => current?.id === id ? null : current);
+      setMessage("Resume and extracted local copy deleted.");
+    } catch (error) { setMessage(error instanceof Error ? error.message : "Delete failed."); }
+  }
+
+  function addResumeSkills() {
+    if (!resumeResult) return;
+    setProfile(current => ({ ...current, skills: Array.from(new Set([...current.skills, ...resumeResult.extracted_skills])) }));
+    setMessage("Extracted skills added to the profile form. Save the profile to keep them.");
   }
 
   async function addJob(event: FormEvent<HTMLFormElement>) {
@@ -209,6 +255,17 @@ export default function Home() {
             <label>Preferred job types<input value={profile.preferred_job_types.join(", ")} onChange={e => updateList("preferred_job_types",e.target.value)} placeholder="Full-time, Contract" /></label>
             <button className="submit-button" type="submit">Save profile locally</button>
           </form>}
+          <div className="resume-panel">
+            <div className="panel-heading"><div><span className="eyebrow">RESUME INTELLIGENCE</span><h3>Import your resume</h3></div><span className="muted-tag">LOCAL ONLY</span></div>
+            <p className="form-intro">Upload a PDF or DOCX (max 10 MB). Text and extracted facts stay in your local CareerPilot data folder. Scanned PDFs requiring OCR are not supported yet.</p>
+            <form className="resume-upload" onSubmit={uploadResume}><input name="resume" type="file" accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" required /><button className="submit-button" type="submit" disabled={resumeBusy}>{resumeBusy ? "Parsing resume…" : "Upload and extract facts"}</button></form>
+            {resumeResult && <div className="resume-result"><strong>Extraction preview: {resumeResult.filename}</strong><p>{resumeResult.extracted_text_length.toLocaleString()} characters extracted · {resumeResult.extracted_skills.length} skill keywords detected</p>
+              <div className="skill-chips">{resumeResult.extracted_skills.map(skill => <span key={skill}>{skill}</span>)}</div>
+              <p>Email found: {resumeResult.extracted_email || "Not detected"} · Phone found: {resumeResult.extracted_phone || "Not detected"}</p>
+              <button className="small-button" type="button" onClick={addResumeSkills}>Add detected skills to profile form</button>
+            </div>}
+            {resumes.length > 0 && <div className="resume-list">{resumes.map(item => <div className="resume-item" key={item.id}><div><strong>{item.filename}</strong><small>{(item.file_size / 1024).toFixed(0)} KB · {new Date(item.uploaded_at).toLocaleDateString()}</small></div><button className="small-button" type="button" onClick={() => void deleteResume(item.id)}>Delete</button></div>)}</div>}
+          </div>
         </section>}
 
         {section === "jobs" && <div className="jobs-layout"><section className="panel"><div className="panel-heading"><div><span className="eyebrow">OPPORTUNITY DATABASE</span><h3>Saved jobs <span className="count">{jobs.length}</span></h3></div><button className="small-button" onClick={() => void loadJobs()}>Refresh</button></div>
