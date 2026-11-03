@@ -1,5 +1,3 @@
-from typing import Literal
-
 from fastapi import APIRouter, HTTPException, Query, status
 
 from app.core.applications_database import create_application, list_applications, update_application
