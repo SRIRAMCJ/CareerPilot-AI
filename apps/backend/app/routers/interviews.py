@@ -50,8 +50,8 @@ def export_calendar_event(event_id: int) -> Response:
     event = get_interview(event_id)
     if event is None:
         raise HTTPException(status_code=404, detail="Interview event not found.")
-    start = datetime.fromisoformat(event["starts_at"]).astimezone(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
-    end = datetime.fromisoformat(event["ends_at"]).astimezone(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    start = datetime.fromisoformat(event["starts_at"].replace("Z", "+00:00")).astimezone(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    end = datetime.fromisoformat(event["ends_at"].replace("Z", "+00:00")).astimezone(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     description = _ics_escape(event["notes"] or f"{event['event_type']} for {event['job_title']} at {event['company']}")
     lines = [
