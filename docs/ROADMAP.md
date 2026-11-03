@@ -44,7 +44,7 @@
 - [x] Basic profile field filling in visible browser and a typed, disabled-by-default submit confirmation
 - [x] Original job-page links and a ready-to-submit review status
 - [x] Local audit event log for profile, discovery, job, application, resume, materials, and interview actions
-- [ ] Formal workflow state machine and audit trail
+- [x] Application status transition state machine with invalid-transition rejection\n- [ ] Tamper-evident audit trail and submission confirmation evidence
 - [x] Visible local Playwright session support with a dedicated browser profile
 - [ ] Per-platform permitted application adapters
 - [ ] Submission idempotency and confirmation evidence
