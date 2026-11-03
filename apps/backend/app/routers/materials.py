@@ -6,6 +6,7 @@ from fastapi.responses import FileResponse
 
 from app.core import database
 from app.core.applications_database import get_application
+from app.core.audit_database import record_event
 from app.core.config import get_settings
 from app.core.jobs_database import get_job
 from app.core.materials_database import create_material, get_material, list_materials
@@ -32,6 +33,7 @@ def create_application_materials(application_id: int) -> dict:
     material = create_material(
         application_id, "resume_and_cover_letter", generated["filename"], generated["path"]
     )
+    record_event("materials.generated", "generated_material", material["id"], {"application_id": application_id, "material_type": material["material_type"]})
     return {**material, "download_url": f"/api/v1/materials/{material['id']}/download"}
 
 
@@ -76,6 +78,7 @@ async def generate_ai_cover_letter(application_id: int) -> dict:
         raise HTTPException(status_code=422, detail=str(error)) from error
     except httpx.HTTPError as error:
         raise HTTPException(status_code=502, detail="The local Ollama model could not be reached.") from error
+    record_event("materials.ai_cover_letter_generated", "application", application_id, {"provider": "ollama", "model": settings.ollama_model})
     return {
         "application_id": application_id,
         "draft": draft,
