@@ -62,3 +62,15 @@ The backend requests:
 - A public listing may change or disappear; verify the original posting before applying.
 - Fetch requests use fixed HTTPS provider hosts and validated board slugs. Do not change this to accept arbitrary URLs; that would introduce server-side request forgery risk.
 - Discovery only saves opportunities. It never applies for a job or contacts an employer.
+
+
+## Company watchlist
+
+The dashboard lets you save multiple company board slugs and scan them together.
+
+- `POST /api/v1/discovery/boards` — add a board.
+- `GET /api/v1/discovery/boards` — list saved boards.
+- `DELETE /api/v1/discovery/boards/{id}` — remove a board.
+- `POST /api/v1/discovery/run` — scan every saved board, optionally filtering by a keyword.
+
+Each scan is sequential and bounded to 100 postings per board. It reports successful boards, source errors, newly saved listings, and duplicates. Scanning is user-triggered in the local dashboard; it does not run as a background scheduler yet.
