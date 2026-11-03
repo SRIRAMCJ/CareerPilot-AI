@@ -36,7 +36,7 @@ def extract_facts(text: str) -> dict:
     lowered = text.casefold()
     skills = [
         skill for skill in SKILL_TERMS
-        if re.search(rf"(?<![\w+#.]){re.escape(skill.casefold())}(?![\w+#.])", lowered)
+        if re.search(rf"(?<!\w){re.escape(skill.casefold())}(?!\w)", lowered)
     ]
     email_match = re.search(r"[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}", text, re.I)
     phone_match = re.search(r"(?<!\w)(?:\+?\d[\d ()-]{7,}\d)(?!\w)", text)

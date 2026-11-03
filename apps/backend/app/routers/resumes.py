@@ -43,6 +43,7 @@ async def upload_resume(file: UploadFile = File(...)) -> dict:
         raise HTTPException(status_code=422, detail="No selectable text was found. Scanned-image PDFs need OCR, which is not enabled yet.")
     safe_name = re.sub(r"[^A-Za-z0-9._-]+", "_", filename)[:120] or "resume"
     destination = local_resume_directory() / f"{uuid4().hex}_{safe_name}"
+    destination.parent.mkdir(parents=True, exist_ok=True)
     destination.write_bytes(content)
     try:
         record = create_resume_record(safe_name, file_type, len(content), str(destination), extracted)

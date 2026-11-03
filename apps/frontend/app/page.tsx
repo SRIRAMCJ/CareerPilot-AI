@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 
 const API = process.env.NEXT_PUBLIC_API_BASE_URL || "http://127.0.0.1:8000";
@@ -270,6 +272,56 @@ export default function Home() {
     } catch (error) { setMessage(error instanceof Error ? error.message : "Could not update application."); }
   }
 
+  async function scheduleInterview(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const startsAt = new Date(interviewDraft.starts_at);
+    const endsAt = new Date(interviewDraft.ends_at);
+    if (!Number.isFinite(startsAt.getTime()) || !Number.isFinite(endsAt.getTime()) || endsAt <= startsAt) {
+      setMessage("Choose a valid start and end time. The end must be after the start.");
+      return;
+    }
+    try {
+      const response = await fetch(`${API}/api/v1/interviews`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          application_id: Number(interviewDraft.application_id),
+          title: interviewDraft.title,
+          event_type: interviewDraft.event_type,
+          starts_at: startsAt.toISOString(),
+          ends_at: endsAt.toISOString(),
+          timezone_name: Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Kolkata",
+          meeting_url: interviewDraft.meeting_url || null,
+          notes: interviewDraft.notes,
+          reminder_minutes: Number(interviewDraft.reminder_minutes),
+        }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.detail || "Could not schedule this event");
+      await loadInterviews();
+      setInterviewDraft({ application_id: "", title: "", event_type: "interview", starts_at: "", ends_at: "", meeting_url: "", notes: "", reminder_minutes: 30 });
+      setMessage("Interview or assessment added to your calendar planner.");
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Could not schedule event.");
+    }
+  }
+
+  async function trackJob(jobId: number) {
+    try {
+      const response = await fetch(`${API}/api/v1/applications`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ job_id: jobId, status: "saved" }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.detail || "Could not track this job");
+      await loadApplications();
+      setMessage("Job added to your application tracker.");
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Could not track job.");
+    }
+  }
+
   async function scoreJob(jobId: number) {
     try {
       const response = await fetch(`${API}/api/v1/jobs/${jobId}/match`);
@@ -297,6 +349,7 @@ export default function Home() {
           <button key={id} className={`nav-item ${section === id ? "active" : ""}`} onClick={() => { setSection(id); setMessage(""); }}>
             {icon} <span>{label}</span>
           </button>)}</nav>
+        <Link className="nav-item" href="/integrations" style={{ display: "block", textDecoration: "none" }}>↗ <span>Integrations</span></Link>
         <div className="sidebar-foot"><span className="status-dot" />Local workspace<small>Your candidate data stays on this device</small></div>
       </aside>
       <section className="content">
@@ -319,7 +372,7 @@ export default function Home() {
             {[["01","Complete your profile","Add verified skills, experience, and role preferences."],["02","Save job opportunities","Add jobs manually while source connectors are being built."],["03","Review match explanations","See matched skills, gaps, and fit reasons."],["04","Prepare applications","Keep submissions candidate-controlled and truthful."]].map(([n,t,d]) =>
               <div className="step" key={n}><span className="step-number">{n}</span><div><strong>{t}</strong><p>{d}</p></div><span className="step-state">READY</span></div>)}
           </article><article className="panel"><span className="eyebrow">SYSTEM STATUS</span><h3>Safe by default.</h3>
-            <p>External job discovery and application submission are not enabled yet.</p>
+            <p>External job discovery, browser-assisted form preparation and Gmail are available under Integrations. Submission is disabled by default.</p>
             <div className="status-row"><span>Backend API</span><span className={apiOnline ? "state good" : "state pending"}>{apiOnline ? "Connected" : "Not connected"}</span></div>
             <div className="status-row"><span>Candidate profile</span><span className="state">{profileExists ? "Configured" : "Not configured"}</span></div>
             <div className="status-row"><span>Browser automation</span><span className="state locked">Disabled</span></div>
@@ -379,7 +432,7 @@ export default function Home() {
           <div className="watchlist-heading"><strong>Company watchlist · {boards.length}</strong><button className="small-button" disabled={discovering || boards.length === 0} onClick={() => void runDiscovery()}>{discovering ? "Scanning boards…" : "Scan all boards"}</button></div>
           <label className="watchlist-filter">Filter scan by keyword (optional)<input value={discoveryDraft.query} onChange={e => setDiscoveryDraft({...discoveryDraft,query:e.target.value})} placeholder="AI Engineer, Python" /></label>
           <div className="watchlist">{boards.length === 0 ? <p className="application-note">Add company boards above to create your personal job-search watchlist.</p> : boards.map(board => <div className="watchlist-item" key={board.id}><div><strong>{board.company_slug}</strong><small>{board.provider}</small></div><button className="small-button" onClick={() => void removeBoard(board.id)}>Remove</button></div>)}</div>
-          <div className="source-disclaimer">Scans public job feeds from configured company boards. LinkedIn, Naukri, Indeed and Google Jobs are not connected. No login scraping or anti-bot bypass is used.</div>
+          <div className="source-disclaimer">Scans public feeds from configured company boards. LinkedIn, Naukri, Indeed and Foundit search links are available under Integrations. No private-page scraping or anti-bot bypass is used.</div>
         </section><section className="panel"><span className="eyebrow">MANUAL JOB CAPTURE</span><h3>Add an opportunity</h3><p className="form-intro">Save a role you found on a job board or company career page.</p>
           <form className="profile-form" onSubmit={addJob}><label>Job title<input required value={jobDraft.title} onChange={e => setJobDraft({...jobDraft,title:e.target.value})} /></label>
             <label>Company<input required value={jobDraft.company} onChange={e => setJobDraft({...jobDraft,company:e.target.value})} /></label>

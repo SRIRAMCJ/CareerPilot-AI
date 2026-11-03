@@ -17,7 +17,8 @@ try {
         py -3.10 -m venv .venv
     }
     & ".venv\Scripts\python.exe" -m pip install --upgrade pip
-    & ".venv\Scripts\python.exe" -m pip install -e ".[dev]"
+    & ".venv\Scripts\python.exe" -m pip install -e ".[dev,browser]"
+    & ".venv\Scripts\python.exe" -m playwright install chromium
 } finally {
     Pop-Location
 }
