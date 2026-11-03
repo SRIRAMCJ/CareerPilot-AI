@@ -1,6 +1,6 @@
 # Public Job Source Connectors
 
-CareerPilot currently supports public company job boards from Greenhouse and Lever.
+CareerPilot currently supports public company job boards from Greenhouse, Lever, and Ashby.
 
 ## Greenhouse
 
@@ -11,6 +11,17 @@ CareerPilot currently supports public company job boards from Greenhouse and Lev
 
 The backend requests the public endpoint:
 `https://boards-api.greenhouse.io/v1/boards/{slug}/jobs?content=true`
+
+## Ashby
+
+1. Open the company's public Ashby job board.
+2. Copy the board name from the URL after `jobs.ashbyhq.com/`.
+3. Select **Ashby** in CareerPilot and enter that board name.
+
+The backend requests the documented public posting endpoint:
+`https://api.ashbyhq.com/posting-api/job-board/{slug}?includeCompensation=true`
+
+Only listed postings are imported. The adapter normalizes workplace type, location, employment type, job URL, and publication date when present. Compensation is not yet parsed into numeric salary fields.
 
 ## Lever
 
