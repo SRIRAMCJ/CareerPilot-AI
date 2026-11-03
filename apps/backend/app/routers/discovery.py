@@ -3,6 +3,7 @@ from fastapi import APIRouter, HTTPException
 
 from app.core.jobs_database import create_job
 from app.schemas.discovery import DiscoveryRequest
+from app.schemas.job import JobListingCreate
 from app.services.job_sources import discover_jobs
 
 router = APIRouter(prefix="/api/v1/discovery", tags=["discovery"])
@@ -36,7 +37,7 @@ async def search_public_jobs(request: DiscoveryRequest) -> dict:
     duplicates = 0
     for item in found:
         try:
-            create_job(item)
+            create_job(JobListingCreate.model_validate(item))
             saved += 1
         except ValueError:
             duplicates += 1
