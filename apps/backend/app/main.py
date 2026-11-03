@@ -5,6 +5,7 @@ from app.core.config import get_settings
 from app.routers.profile import router as profile_router
 from app.routers.jobs import router as jobs_router
 from app.routers.applications import router as applications_router
+from app.routers.discovery import router as discovery_router
 
 settings = get_settings()
 
@@ -17,6 +18,7 @@ app = FastAPI(
 app.include_router(profile_router)
 app.include_router(jobs_router)
 app.include_router(applications_router)
+app.include_router(discovery_router)
 
 app.add_middleware(
     CORSMiddleware,
