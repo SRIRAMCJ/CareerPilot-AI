@@ -23,6 +23,8 @@ class EmailDraft(BaseModel):
     subject: str = Field(min_length=1, max_length=250)
     body: str = Field(min_length=1, max_length=20000)
     thread_id: str | None = Field(default=None, max_length=200)
+    in_reply_to: str | None = Field(default=None, max_length=500)
+    references: str | None = Field(default=None, max_length=1000)
 
 
 def _settings():
@@ -172,6 +174,10 @@ def _raw_message(item: EmailDraft) -> str:
     message = MIMEText(item.body, "plain", "utf-8")
     message["To"] = ", ".join(str(address) for address in item.to)
     message["Subject"] = item.subject
+    if item.in_reply_to:
+        message["In-Reply-To"] = item.in_reply_to
+    if item.references:
+        message["References"] = item.references
     return base64.urlsafe_b64encode(message.as_bytes()).decode("ascii")
 
 
