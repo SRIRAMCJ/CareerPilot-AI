@@ -214,6 +214,16 @@ export default function Home() {
     } catch (error) { setMessage(error instanceof Error ? error.message : "Material generation failed."); }
   }
 
+  async function updateApplicationDetails(id: number, patch: Partial<Pick<Application, "notes" | "next_action" | "follow_up_date">>) {
+    try {
+      const response = await fetch(`${API}/api/v1/applications/${id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(patch) });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.detail || "Could not save application details");
+      setApplications(current => current.map(item => item.id === id ? { ...item, ...data } : item));
+      setMessage("Application notes and follow-up details saved.");
+    } catch (error) { setMessage(error instanceof Error ? error.message : "Could not save details."); }
+  }
+
   async function updateApplicationStatus(id: number, status: string) {
     try {
       const response = await fetch(`${API}/api/v1/applications/${id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status }) });
@@ -338,6 +348,7 @@ export default function Home() {
           {applications.length === 0 ? <div className="empty-state"><strong>No tracked opportunities yet</strong><p>Open Job discovery and select “Track job” on an opportunity you want to follow.</p></div> :
             <div className="job-list">{applications.map(item => <article className="job-card" key={item.id}><div className="job-card-top"><div><strong>{item.job_title}</strong><p>{item.company}</p></div><span className="job-source">#{item.id}</span></div>
               <div className="application-controls"><label>Status<select value={item.status} onChange={event => void updateApplicationStatus(item.id,event.target.value)}>{["saved","shortlisted","preparing","applied","assessment","interview","offer","rejected","withdrawn"].map(status => <option key={status} value={status}>{status.replace("_"," ")}</option>)}</select></label><button className="small-button" onClick={() => void generateMaterials(item.id)}>Generate application pack</button>{materialLinks[item.id] && <a href={`${API}${materialLinks[item.id]}`} target="_blank" rel="noreferrer">Download DOCX ↗</a>}<span className="application-note">Draft uses saved profile facts. Review before sending; no application is submitted.</span></div>
+              <div className="application-details"><label>Next action<input value={item.next_action || ""} placeholder="e.g. Follow up with recruiter" onChange={event => setApplications(current => current.map(row => row.id === item.id ? {...row,next_action:event.target.value} : row))} /></label><label>Follow-up date<input type="date" value={item.follow_up_date || ""} onChange={event => setApplications(current => current.map(row => row.id === item.id ? {...row,follow_up_date:event.target.value} : row))} /></label><label>Notes<textarea rows={2} value={item.notes || ""} onChange={event => setApplications(current => current.map(row => row.id === item.id ? {...row,notes:event.target.value} : row))} /></label><button className="small-button" onClick={() => void updateApplicationDetails(item.id,{next_action:item.next_action || "",follow_up_date:item.follow_up_date || null,notes:item.notes || ""})}>Save notes and follow-up</button></div>
             </article>)}</div>}
         </section>}
         {section === "interviews" && <div className="jobs-layout"><section className="panel"><div className="panel-heading"><div><span className="eyebrow">INTERVIEW CENTER</span><h3>Upcoming events <span className="count">{interviews.length}</span></h3></div><button className="small-button" onClick={() => void loadInterviews()}>Refresh</button></div>
