@@ -73,4 +73,4 @@ The dashboard lets you save multiple company board slugs and scan them together.
 - `DELETE /api/v1/discovery/boards/{id}` — remove a board.
 - `POST /api/v1/discovery/run` — scan every saved board, optionally filtering by a keyword.
 
-Each scan is sequential and bounded to 100 postings per board. It reports successful boards, source errors, newly saved listings, and duplicates. Scanning is user-triggered in the local dashboard; it does not run as a background scheduler yet.
+Each scan is sequential and bounded to 100 postings per board. It reports successful boards, source errors, newly saved listings, and duplicates. Scanning can be started from the dashboard or optionally scheduled with the Windows Task Scheduler scripts documented in `DEVELOPMENT.md`.
