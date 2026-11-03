@@ -10,7 +10,11 @@ def test_job_board_links_include_all_requested_providers():
     result = job_board_search_links(query="AI Engineer", location="Chennai")
     providers = {item["provider"] for item in result["items"]}
     assert providers == {"linkedin", "naukri", "indeed", "foundit"}
-    for item in result["items"]:\n        if item["provider"] == "naukri":\n            assert "ai-engineer-jobs-in-chennai" in item["url"]\n        else:\n            assert "AI+Engineer" in item["url"] or "AI%20Engineer" in item["url"]
+    for item in result["items"]:
+        if item["provider"] == "naukri":
+            assert "ai-engineer-jobs-in-chennai" in item["url"]
+        else:
+            assert "AI+Engineer" in item["url"] or "AI%20Engineer" in item["url"]
     assert all("Chennai" in item["url"] for item in result["items"])
 
 
