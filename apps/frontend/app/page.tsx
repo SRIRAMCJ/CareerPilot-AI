@@ -346,7 +346,7 @@ export default function Home() {
             </article>)}</div>}
         </section><section className="panel"><span className="eyebrow">PUBLIC JOB SOURCES</span><h3>Discover jobs</h3><p className="form-intro">Search public company boards on Greenhouse or Lever. Enter the board slug, not a full URL.</p>
           <form className="profile-form discovery-form" onSubmit={discoverJobs}>
-            <label>Job source<select value={discoveryDraft.provider} onChange={e => setDiscoveryDraft({...discoveryDraft,provider:e.target.value})}><option value="greenhouse">Greenhouse</option><option value="lever">Lever</option><option value="ashby">Ashby</option></select></label>
+            <label>Job source<select value={discoveryDraft.provider} onChange={e => setDiscoveryDraft({...discoveryDraft,provider:e.target.value})}><option value="greenhouse">Greenhouse</option><option value="lever">Lever</option><option value="ashby">Ashby</option><option value="workable">Workable</option></select></label>
             <label>Company board slug<input required value={discoveryDraft.company_slug} onChange={e => setDiscoveryDraft({...discoveryDraft,company_slug:e.target.value})} placeholder="e.g. openai" /></label>
             <label>Keyword filter (optional)<input value={discoveryDraft.query} onChange={e => setDiscoveryDraft({...discoveryDraft,query:e.target.value})} placeholder="AI Engineer, Python" /></label>
             <button className="submit-button" type="submit" disabled={discovering}>{discovering ? "Searching public board…" : "Search and save jobs"}</button>
