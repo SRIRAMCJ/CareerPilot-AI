@@ -97,9 +97,53 @@ async def fetch_lever(slug: str, limit: int) -> list[dict[str, Any]]:
     return jobs
 
 
+
+async def fetch_ashby(slug: str, limit: int) -> list[dict[str, Any]]:
+    url = f"https://api.ashbyhq.com/posting-api/job-board/{slug}"
+    async with httpx.AsyncClient(timeout=15.0, follow_redirects=False) as client:
+        response = await client.get(url, params={"includeCompensation": "true"})
+        response.raise_for_status()
+        payload = response.json()
+    jobs = []
+    for item in payload.get("jobs", []):
+        if item.get("isListed") is False:
+            continue
+        location = item.get("location") or ""
+        secondary = [
+            entry.get("location", "") for entry in item.get("secondaryLocations", [])
+            if entry.get("location")
+        ]
+        if secondary:
+            location = ", ".join([location, *secondary]) if location else ", ".join(secondary)
+        description = item.get("descriptionPlain") or html_to_text(item.get("descriptionHtml"))
+        workplace = (item.get("workplaceType") or "").casefold()
+        work_mode = {
+            "remote": "Remote", "hybrid": "Hybrid", "onsite": "On-site",
+        }.get(workplace) or _work_mode(location, description)
+        published = item.get("publishedAt") or ""
+        jobs.append({
+            "title": item.get("title") or "Untitled role",
+            "company": slug.replace("-", " ").title(),
+            "location": location or None,
+            "work_mode": work_mode,
+            "job_type": item.get("employmentType"),
+            "source": f"ashby:{slug}",
+            "source_job_id": str(item.get("id") or item.get("jobUrl") or item.get("applyUrl")),
+            "url": item.get("jobUrl") or item.get("applyUrl"),
+            "description": description[:30000],
+            "required_skills": _skills(description),
+            "posted_date": published[:10] if published else None,
+        })
+        if len(jobs) >= limit:
+            break
+    return jobs
+
+
 async def discover_jobs(provider: str, slug: str, limit: int) -> list[dict[str, Any]]:
     if provider == "greenhouse":
         return await fetch_greenhouse(slug, limit)
     if provider == "lever":
         return await fetch_lever(slug, limit)
+    if provider == "ashby":
+        return await fetch_ashby(slug, limit)
     raise ValueError("Unsupported job source.")
