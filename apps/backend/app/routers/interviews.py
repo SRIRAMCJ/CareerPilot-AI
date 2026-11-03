@@ -64,6 +64,14 @@ def export_calendar_event(event_id: int) -> Response:
     ]
     if event["meeting_url"]:
         lines.append(f"URL:{event['meeting_url']}")
+    if event["reminder_minutes"] > 0:
+        lines.extend([
+            "BEGIN:VALARM",
+            f"TRIGGER:-PT{event['reminder_minutes']}M",
+            "ACTION:DISPLAY",
+            f"DESCRIPTION:{_ics_escape(event['title'])}",
+            "END:VALARM",
+        ])
     lines.extend(["END:VEVENT", "END:VCALENDAR", ""])
     return Response(
         content="\r\n".join(lines),
