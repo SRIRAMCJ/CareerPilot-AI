@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "careerpilot-backend"
 version = "0.1.0"
 description = "Local-first API for CareerPilot AI"
-requires-python = ">=3.11"
+requires-python = ">=3.10"
 dependencies = [
   "fastapi>=0.115,<1.0",
   "uvicorn[standard]>=0.30,<1.0",
@@ -35,7 +35,7 @@ addopts = "-ra"
 
 [tool.ruff]
 line-length = 100
-target-version = "py311"
+target-version = "py310"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP"]
