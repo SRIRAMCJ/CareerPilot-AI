@@ -1,74 +1,59 @@
 # CareerPilot AI
 
-A local-first personal career workflow application for discovering opportunities, matching jobs to a verified candidate profile, preparing application materials, and tracking recruiter communication and interviews.
+A local-first personal career workspace for discovering jobs, matching opportunities against a verified candidate profile, preparing application documents, tracking applications, and organizing interviews.
 
-> **Current status:** Foundation initialization. Live job-source integrations, AI generation, application submission, Gmail, and Calendar are not enabled yet.
+## Implemented in the current local-first release
 
-## Principles
+- Candidate profile CRUD in SQLite, including roles, preferences, experience, education, projects, and certifications.
+- PDF/DOCX resume import, local storage, text extraction, and skill/contact hints for candidate review.
+- Public job discovery from Greenhouse, Lever, Ashby, and Workable company boards.
+- Persistent company-board watchlist, one-click multi-board scans, and optional Windows Task Scheduler daily scans.
+- Manual job capture, local search, duplicate detection, and explainable matching with location, work-mode, and salary eligibility blockers.
+- Application tracker with statuses, notes, next actions, follow-up dates, and original job-page links.
+- Per-application DOCX resume and cover-letter draft generation from saved profile facts.
+- Interview and assessment scheduling with timezone-aware ICS export and calendar reminder alarms.
+- Windows setup and local launch scripts.
 
-- **Local-first:** candidate data, resumes, browser sessions, and databases remain on the user's machine.
-- **Provider-independent:** start with deterministic Python logic; add optional cloud or local AI providers later.
-- **Truthful applications:** generated claims must be supported by verified candidate-profile evidence.
-- **Safe automation:** never bypass CAPTCHA, anti-bot protections, login restrictions, or rate limits.
-- **Auditable:** persist important decisions, workflow transitions, and external actions.
-- **Candidate-controlled:** the candidate personally completes interviews and identity-bound assessments.
+## Technology
 
-## Planned stack
+- Backend: Python 3.11+, FastAPI, Pydantic, SQLite, HTTPX.
+- Resume and document handling: pypdf and python-docx.
+- Frontend: Next.js 15, React 19, TypeScript.
+- Runtime: Windows 11 local-first workflow; backend binds to loopback by default.
 
-- Backend: Python 3.11+, FastAPI, Pydantic, SQLAlchemy, Alembic
-- Frontend: Next.js, TypeScript
-- Workflows: LangGraph when multi-step stateful workflows are introduced
-- Browser: Playwright for permitted and authorized workflows only
-- Database: PostgreSQL
-- AI: optional provider abstraction; no model required for initial development
+## Quick start (Windows)
 
-## Repository layout
+From the repository root:
 
-```
-apps/
-  backend/
-  frontend/
-docs/
-  ARCHITECTURE.md
-  DEVELOPMENT.md
-  ROADMAP.md
-  SECURITY.md
-.github/
-  workflows/
+```powershell
+.\scripts\setup-local.ps1
+.\scripts\start-local.ps1
 ```
 
-## Development
+Open the dashboard at `http://localhost:3000` and API documentation at `http://127.0.0.1:8000/docs`.
 
-Read [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) and [docs/ROADMAP.md](docs/ROADMAP.md). The first milestone is a tested backend foundation and a minimal frontend shell. Use fixtures and mock data until integrations have been reviewed and authorized.
-
-## Privacy
-
-Never commit resumes, personal contact details, browser profiles, OAuth tokens, API keys, local database files, generated application documents, or real application evidence. Review `.gitignore` before adding files.
+For manual setup, troubleshooting, daily scanning, and tests, read [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md).
 
 ## Integration status
 
-Every integration must be labeled **implemented**, **partial**, or **unavailable**. Do not represent mock integrations as live.
+| Capability | Status | Notes |
+|---|---|---|
+| Greenhouse, Lever, Ashby, Workable | Implemented | Public company-board discovery; user supplies board slugs |
+| PDF/DOCX resume parsing | Partial | Selectable text only; scanned PDF OCR not included |
+| Matching and eligibility | Implemented | Deterministic and explainable; skill extraction is heuristic |
+| Application preparation | Partial | DOCX drafts from saved profile facts; candidate review required |
+| Application submission | Unavailable | No automated submission or browser automation |
+| LinkedIn, Naukri, Indeed, Foundit, Google Jobs | Unavailable | No approved connector configured |
+| Gmail and recruiter email | Unavailable | OAuth and email workflows not implemented |
+| Google Calendar | Partial | ICS export supported; direct Calendar OAuth/sync not implemented |
+| Local LLM | Optional future integration | Current matching and document generation do not require a model |
 
+## Privacy and safety
 
-## Public job discovery
+Candidate profiles, resumes, extracted resume text, generated documents, and databases are stored locally and excluded from Git. Never commit real candidate data, credentials, OAuth tokens, browser profiles, or application evidence. Make the repository private before adding any private project configuration or personal data.
 
-CareerPilot supports manual job capture plus public Greenhouse and Lever company-board discovery. See [docs/JOB_SOURCES.md](docs/JOB_SOURCES.md) for setup and limitations.
+CareerPilot does not bypass CAPTCHA, anti-bot protections, login restrictions, or rate limits. It does not invent candidate qualifications, submit legal declarations, pay application fees, or complete identity-bound assessments/interviews. Generated documents must be reviewed before use.
 
-The discovery endpoint fetches public postings, normalizes the listing, saves it to local SQLite, and skips duplicate source IDs. It does not scrape authenticated job-board pages or submit applications.
+## Roadmap
 
-### Local development
-
-Install backend dependencies from `apps/backend` with `pip install -e ".[dev]"`. Start the API with `uvicorn app.main:app --reload --host 127.0.0.1 --port 8000`. Start the frontend from `apps/frontend` with `npm install` and `npm run dev`.
-
-
-## Current local-first features
-
-- Candidate profile CRUD and preferences in SQLite.
-- PDF/DOCX resume import, text extraction, skill/contact hints, and local deletion.
-- Public job-board discovery from Greenhouse, Lever, Ashby, and Workable.
-- Local opportunity search, duplicate detection, and explainable profile matching.
-- Application pipeline with notes and follow-up dates.
-- Per-application DOCX resume and cover-letter draft generation from saved profile facts.
-- Interview and assessment scheduling with timezone-aware calendar export and reminder alarms.
-
-See [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) to run the application. See the roadmap for integrations that still require implementation, credentials, or platform-specific permission review.
+See [docs/ROADMAP.md](docs/ROADMAP.md) for completed milestones and remaining work. In particular, authenticated job-board integrations, actual application submission, Gmail, direct Google Calendar sync, audit logging, encrypted backup, and full end-to-end runtime verification remain release work.
