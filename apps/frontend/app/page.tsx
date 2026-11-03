@@ -14,7 +14,7 @@ type Job = {
   id: number; title: string; company: string; location?: string | null; work_mode?: string | null;
   source: string; url?: string | null; required_skills: string[]; status: string;
 };
-type Match = { score: number; decision: string; matched_skills: string[]; missing_skills: string[]; reasons: string[] };
+type Match = { score: number; decision: string; eligible: boolean; blocking_reasons: string[]; matched_skills: string[]; missing_skills: string[]; reasons: string[] };
 type Application = { id: number; job_id: number; status: string; notes: string; next_action?: string | null; follow_up_date?: string | null; job_title: string; company: string; job_url?: string | null };
 type ResumeItem = { id: number; filename: string; file_type: string; file_size: number; uploaded_at: string };
 type ResumeResult = ResumeItem & { extracted_text_length: number; extracted_skills: string[]; extracted_email?: string | null; extracted_phone?: string | null };
@@ -342,7 +342,7 @@ export default function Home() {
             <div className="job-list">{jobs.map(job => <article className="job-card" key={job.id}><div className="job-card-top"><div><strong>{job.title}</strong><p>{job.company} · {job.location || "Location not specified"}</p></div><span className="job-source">{job.source}</span></div>
               <div className="skill-chips">{job.required_skills.map(skill => <span key={skill}>{skill}</span>)}</div>
               <div className="job-actions"><span>{job.work_mode || "Work mode unspecified"}</span><button className="small-button" onClick={() => void scoreJob(job.id)}>Calculate match</button><button className="small-button" onClick={() => void trackJob(job.id)}>Track job</button>{job.url && <a href={job.url} target="_blank" rel="noreferrer">Open listing ↗</a>}</div>
-              {matches[job.id] && <div className="match-result"><div className="score"><strong>{matches[job.id].score}</strong><small>/ 100 match</small></div><div><strong>{matches[job.id].decision.replace("_"," ")}</strong><p>{matches[job.id].reasons.join(" · ")}</p><p>Matched: {matches[job.id].matched_skills.join(", ") || "None"} · Gaps: {matches[job.id].missing_skills.join(", ") || "None"}</p></div></div>}
+              {matches[job.id] && <div className="match-result"><div className="score"><strong>{matches[job.id].score}</strong><small>/ 100 match</small></div><div><strong>{matches[job.id].decision.replace("_"," ")}</strong><p>{matches[job.id].reasons.join(" · ")}</p>{matches[job.id].blocking_reasons.length > 0 && <p className="match-blockers">Eligibility blockers: {matches[job.id].blocking_reasons.join(" · ")}</p>}<p>Matched: {matches[job.id].matched_skills.join(", ") || "None"} · Gaps: {matches[job.id].missing_skills.join(", ") || "None"}</p></div></div>}
             </article>)}</div>}
         </section><section className="panel"><span className="eyebrow">PUBLIC JOB SOURCES</span><h3>Discover jobs</h3><p className="form-intro">Search public company boards on Greenhouse or Lever. Enter the board slug, not a full URL.</p>
           <form className="profile-form discovery-form" onSubmit={discoverJobs}>
