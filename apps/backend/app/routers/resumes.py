@@ -4,6 +4,7 @@ from uuid import uuid4
 
 from fastapi import APIRouter, File, HTTPException, UploadFile, status
 
+from app.core.audit_database import record_event
 from app.core.resume_database import (
     create_resume_record, delete_resume_record, get_resume_record,
     list_resume_records, local_resume_directory,
@@ -48,6 +49,7 @@ async def upload_resume(file: UploadFile = File(...)) -> dict:
     except Exception:
         destination.unlink(missing_ok=True)
         raise
+    record_event("resume.uploaded", "resume", record["id"], {"file_type": file_type, "file_size": len(content), "text_length": len(extracted)})
     facts = extract_facts(extracted)
     return {
         **record,
@@ -83,4 +85,5 @@ def delete_resume(resume_id: int) -> dict:
     if record is None:
         raise HTTPException(status_code=404, detail="Resume not found.")
     Path(record["stored_path"]).unlink(missing_ok=True)
+    record_event("resume.deleted", "resume", resume_id)
     return {"status": "deleted", "id": resume_id}
