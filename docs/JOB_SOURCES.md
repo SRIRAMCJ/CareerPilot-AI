@@ -1,0 +1,42 @@
+# Public Job Source Connectors
+
+CareerPilot currently supports public company job boards from Greenhouse and Lever.
+
+## Greenhouse
+
+1. Open the company's public Greenhouse job board.
+2. Copy the board token/slug from the board URL.
+3. Select **Greenhouse** in CareerPilot.
+4. Enter the slug only (for example, `example-company`), not the full URL.
+
+The backend requests the public endpoint:
+`https://boards-api.greenhouse.io/v1/boards/{slug}/jobs?content=true`
+
+## Lever
+
+1. Open the company's public Lever postings page.
+2. Copy the site slug from the URL.
+3. Select **Lever** in CareerPilot.
+4. Enter the slug only.
+
+The backend requests:
+`https://api.lever.co/v0/postings/{slug}?mode=json`
+
+## Current behavior
+
+- Fetches a bounded set of public postings (maximum 100 per request).
+- Normalizes title, company slug, location, work mode, source ID, URL, description, and a basic keyword-based skills list.
+- Saves records to the local SQLite database.
+- Uses source + source job ID to avoid duplicate records.
+- Supports an optional keyword filter after fetching.
+- Does not require a job-board account or candidate credentials.
+
+## Limitations and safety
+
+- These connectors do not cover every employer or job platform.
+- LinkedIn, Naukri, Indeed, Foundit, and Google Jobs are not connected. CareerPilot will not scrape authenticated pages, bypass CAPTCHAs, defeat rate limits, or evade access controls.
+- Company name is currently inferred from the board slug. Verify it when preparing applications.
+- Extracted skills are keyword hints, not a complete or authoritative requirements analysis.
+- A public listing may change or disappear; verify the original posting before applying.
+- Fetch requests use fixed HTTPS provider hosts and validated board slugs. Do not change this to accept arbitrary URLs; that would introduce server-side request forgery risk.
+- Discovery only saves opportunities. It never applies for a job or contacts an employer.
