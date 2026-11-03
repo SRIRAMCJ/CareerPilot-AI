@@ -6,6 +6,7 @@ from fastapi.testclient import TestClient
 from app.core import database, resume_database
 from app.main import app
 from app.services.resume_parser import extract_facts
+
 client = TestClient(app)
 
 
