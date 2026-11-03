@@ -90,7 +90,7 @@ export default function IntegrationsPage() {
     try {
       const data = await request("/api/v1/gmail/send", {
         method: "POST",
-        body: JSON.stringify({ to: recipient.split(",").map(value => value.trim()), subject, body }),
+        body: JSON.stringify({ to: recipient.split(",").map(value => value.trim()), subject, body, thread_id: replyThreadId || undefined, in_reply_to: replyInReplyTo || undefined, references: replyReferences || undefined }),
       });
       setMessage(`Email sent. Gmail message ID: ${data.id}`);
     } catch (error) { setMessage(error instanceof Error ? error.message : "Could not send email."); }
