@@ -1,8 +1,8 @@
 from fastapi.testclient import TestClient
 
 from app.core import database
-from app.routers import materials
 from app.main import app
+from app.routers import materials
 
 client = TestClient(app)
 
