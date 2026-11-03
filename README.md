@@ -65,7 +65,7 @@ Install backend dependencies from `apps/backend` with `pip install -e ".[dev]"`.
 
 - Candidate profile CRUD and preferences in SQLite.
 - PDF/DOCX resume import, text extraction, skill/contact hints, and local deletion.
-- Public job-board discovery from Greenhouse, Lever, and Ashby.
+- Public job-board discovery from Greenhouse, Lever, Ashby, and Workable.
 - Local opportunity search, duplicate detection, and explainable profile matching.
 - Application pipeline with notes and follow-up dates.
 - Per-application DOCX resume and cover-letter draft generation from saved profile facts.
