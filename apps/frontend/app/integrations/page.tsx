@@ -4,7 +4,7 @@ import { useEffect, useState, type FormEvent } from "react";
 
 const API = process.env.NEXT_PUBLIC_API_BASE_URL || "http://127.0.0.1:8000";
 type BoardLink = { provider: string; url: string; mode: string };
-type GmailMessage = { id: string; thread_id?: string; from: string; to: string; subject: string; date: string; snippet: string };
+type GmailMessage = { id: string; thread_id?: string; from: string; to: string; subject: string; date: string; snippet: string; message_id_header?: string; references_header?: string };
 
 export default function IntegrationsPage() {
   const [query, setQuery] = useState("AI Engineer");
@@ -16,7 +16,7 @@ export default function IntegrationsPage() {
   const [messages, setMessages] = useState<GmailMessage[]>([]);
   const [recipient, setRecipient] = useState("");
   const [subject, setSubject] = useState("");
-  const [body, setBody] = useState("");
+  const [body, setBody] = useState("");\n  const [replyThreadId, setReplyThreadId] = useState("");\n  const [replyInReplyTo, setReplyInReplyTo] = useState("");\n  const [replyReferences, setReplyReferences] = useState("");
   const [applicationId, setApplicationId] = useState("");
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
@@ -73,7 +73,7 @@ export default function IntegrationsPage() {
     try {
       const data = await request("/api/v1/gmail/drafts", {
         method: "POST",
-        body: JSON.stringify({ to: recipient.split(",").map(value => value.trim()), subject, body }),
+        body: JSON.stringify({ to: recipient.split(",").map(value => value.trim()), subject, body, thread_id: replyThreadId || undefined, in_reply_to: replyInReplyTo || undefined, references: replyReferences || undefined }),
       });
       setMessage(`Gmail draft saved (${data.id}).`);
     } catch (error) { setMessage(error instanceof Error ? error.message : "Could not save draft."); }
