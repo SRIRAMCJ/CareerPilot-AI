@@ -128,3 +128,6 @@ button { cursor: pointer; }
 .resume-item > div { display: grid; gap: 4px; min-width: 0; }
 .resume-item strong { color: #42566a; font-size: 11px; overflow-wrap: anywhere; }
 .resume-item small { color: #8b99a6; font-size: 9px; }
+
+.interview-time { margin: 13px 0 8px; color: #405c73; font-size: 11px; font-weight: 700; }
+.interview-time span { margin-left: 6px; color: #8b99a6; font-size: 9px; font-weight: 400; }
