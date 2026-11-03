@@ -5,6 +5,28 @@ from app.core import database
 from app.schemas.application import ApplicationCreate, ApplicationUpdate
 
 
+_ALLOWED_TRANSITIONS = {
+    "saved": {"shortlisted", "preparing", "withdrawn", "rejected"},
+    "shortlisted": {"saved", "preparing", "withdrawn", "rejected"},
+    "preparing": {"shortlisted", "ready_to_submit", "withdrawn", "rejected"},
+    "ready_to_submit": {"preparing", "applied", "withdrawn"},
+    "applied": {"assessment", "interview", "offer", "rejected", "withdrawn"},
+    "assessment": {"interview", "offer", "rejected", "withdrawn"},
+    "interview": {"assessment", "offer", "rejected", "withdrawn"},
+    "offer": {"withdrawn"},
+    "rejected": set(),
+    "withdrawn": set(),
+}
+
+
+def validate_status_transition(current: str, target: str) -> None:
+    if current == target:
+        return
+    if target not in _ALLOWED_TRANSITIONS.get(current, set()):
+        raise ValueError(f"Invalid application status transition: {current} -> {target}.")
+
+
+
 def _connect() -> sqlite3.Connection:
     database.initialize_database()
     connection = sqlite3.connect(database.database_path())
@@ -63,6 +85,11 @@ def update_application(application_id: int, item: ApplicationUpdate) -> dict[str
     assignments = ", ".join(f"{key} = ?" for key in changes)
     values = [*changes.values(), application_id]
     with _connect() as connection:
+        current = connection.execute("SELECT status FROM applications WHERE id = ?", (application_id,)).fetchone()
+        if current is None:
+            return None
+        if "status" in changes and changes["status"] is not None:
+            validate_status_transition(current["status"], changes["status"])
         cursor = connection.execute(
             f"UPDATE applications SET {assignments}, updated_at = CURRENT_TIMESTAMP WHERE id = ?",
             values,
