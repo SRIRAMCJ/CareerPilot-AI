@@ -272,6 +272,22 @@ export default function Home() {
     } catch (error) { setMessage(error instanceof Error ? error.message : "Could not update application."); }
   }
 
+  async function trackJob(jobId: number) {
+    try {
+      const response = await fetch(`${API}/api/v1/applications`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ job_id: jobId, status: "saved" }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.detail || "Could not track this job");
+      await loadApplications();
+      setMessage("Job added to your application tracker.");
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Could not track job.");
+    }
+  }
+
   async function scoreJob(jobId: number) {
     try {
       const response = await fetch(`${API}/api/v1/jobs/${jobId}/match`);
