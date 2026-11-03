@@ -2,6 +2,7 @@ from datetime import datetime, timezone
 
 from fastapi import APIRouter, HTTPException, Response, status
 
+from app.core.audit_database import record_event
 from app.core.interviews_database import (
     create_interview, delete_interview, get_interview, list_interviews, update_interview,
 )
@@ -13,7 +14,9 @@ router = APIRouter(prefix="/api/v1/interviews", tags=["interview scheduling"])
 @router.post("", status_code=status.HTTP_201_CREATED)
 def add_interview(item: InterviewCreate) -> dict:
     try:
-        return create_interview(item)
+        created = create_interview(item)
+        record_event("interview.created", "interview", created["id"], {"application_id": created["application_id"], "event_type": created["event_type"], "starts_at": created["starts_at"]})
+        return created
     except ValueError as error:
         raise HTTPException(status_code=409, detail=str(error)) from error
 
@@ -31,6 +34,7 @@ def patch_interview(event_id: int, item: InterviewUpdate) -> dict:
         raise HTTPException(status_code=422, detail=str(error)) from error
     if updated is None:
         raise HTTPException(status_code=404, detail="Interview event not found.")
+    record_event("interview.updated", "interview", event_id, {"updated_fields": list(item.model_fields_set)})
     return updated
 
 
@@ -38,6 +42,7 @@ def patch_interview(event_id: int, item: InterviewUpdate) -> dict:
 def remove_interview(event_id: int) -> dict:
     if not delete_interview(event_id):
         raise HTTPException(status_code=404, detail="Interview event not found.")
+    record_event("interview.deleted", "interview", event_id)
     return {"status": "deleted", "id": event_id}
 
 
