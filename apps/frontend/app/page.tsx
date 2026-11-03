@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 
 const API = process.env.NEXT_PUBLIC_API_BASE_URL || "http://127.0.0.1:8000";
@@ -297,7 +299,7 @@ export default function Home() {
           <button key={id} className={`nav-item ${section === id ? "active" : ""}`} onClick={() => { setSection(id); setMessage(""); }}>
             {icon} <span>{label}</span>
           </button>)}</nav>
-        <a className="nav-item" href="/integrations" style={{ display: "block", textDecoration: "none" }}>↗ <span>Integrations</span></a>
+        <Link className="nav-item" href="/integrations" style={{ display: "block", textDecoration: "none" }}>↗ <span>Integrations</span></Link>
         <div className="sidebar-foot"><span className="status-dot" />Local workspace<small>Your candidate data stays on this device</small></div>
       </aside>
       <section className="content">
