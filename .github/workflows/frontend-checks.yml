@@ -26,6 +26,10 @@ jobs:
         if: steps.detect.outputs.present == 'true'
         working-directory: apps/frontend
         run: npm install
+      - name: Lint frontend
+        if: steps.detect.outputs.present == 'true'
+        working-directory: apps/frontend
+        run: npm run lint
       - name: Build frontend
         if: steps.detect.outputs.present == 'true'
         working-directory: apps/frontend
