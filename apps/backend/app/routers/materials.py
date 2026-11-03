@@ -5,12 +5,12 @@ from fastapi import APIRouter, HTTPException
 from fastapi.responses import FileResponse
 
 from app.core import database
-from app.core.config import get_settings
 from app.core.applications_database import get_application
+from app.core.config import get_settings
+from app.core.jobs_database import get_job
 from app.core.materials_database import create_material, get_material, list_materials
 from app.services.ai_provider import generate_cover_letter
 from app.services.materials_generator import generate_application_pack, generated_material_directory
-from app.core.jobs_database import get_job
 
 router = APIRouter(prefix="/api/v1", tags=["application materials"])
 
