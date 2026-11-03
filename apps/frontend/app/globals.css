@@ -65,3 +65,44 @@ a { color: inherit; text-decoration: none; }
 footer { display: flex; justify-content: space-between; padding: 25px 2px 5px; color: #91a0ae; font-size: 8px; letter-spacing: 1px; }
 @media (max-width: 1050px) { .content { padding: 28px 25px; }.welcome-art { margin-right: 0; }.lower-grid { grid-template-columns: 1fr; } }
 @media (max-width: 760px) { .sidebar { position: static; width: auto; min-height: auto; padding: 16px 20px; display: block; }.brand-copy { top: 20px; left: 70px; }.sidebar nav { display: flex; overflow-x: auto; margin-top: 18px; }.nav-item { white-space: nowrap; }.sidebar-foot { display: none; }.content { margin: 0; padding: 23px 16px; }.welcome { padding: 27px 23px; }.welcome-art { display: none; }.metric-grid { grid-template-columns: repeat(2, 1fr); }.step { grid-template-columns: 27px 1fr; }.step-state { display: none; }footer span { display: none; } }
+
+
+/* Interactive workspace */
+button, input, textarea, select { font: inherit; }
+button { cursor: pointer; }
+.nav-item { width: 100%; border: 0; background: transparent; text-align: left; font-family: inherit; }
+.status-dot.offline { background: #e1a36c; }
+.notice { padding: 12px 15px; margin: 0 0 16px; border: 1px solid #d6e8e2; background: #f0f8f5; color: #356e60; border-radius: 9px; font-size: 12px; }
+.form-panel { max-width: 900px; }
+.form-intro { font-size: 12px; line-height: 1.6; color: #7d8b9b; margin: 12px 0 20px; }
+.profile-form { display: grid; gap: 14px; }
+.profile-form label { display: grid; gap: 7px; font-size: 11px; font-weight: 700; color: #526174; }
+.profile-form label small { color: #94a0ad; font-size: 9px; font-weight: 400; }
+.profile-form input, .profile-form textarea, .profile-form select { width: 100%; border: 1px solid #dfe6ed; border-radius: 7px; padding: 11px 12px; color: #26384a; background: #fff; font-size: 12px; outline: none; }
+.profile-form input:focus, .profile-form textarea:focus, .profile-form select:focus { border-color: #6b9ac2; box-shadow: 0 0 0 3px #6b9ac21c; }
+.profile-form textarea { resize: vertical; }
+.form-two { display: grid; grid-template-columns: 1fr 1fr; gap: 13px; }
+.submit-button, .small-button { border: 0; border-radius: 7px; background: #193b58; color: #fff; padding: 11px 15px; font-size: 11px; font-weight: 700; }
+.submit-button { justify-self: start; margin-top: 5px; }
+.small-button { padding: 8px 11px; background: #eaf1f6; color: #315b7a; }
+.jobs-layout { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(280px, .85fr); gap: 15px; align-items: start; }
+.count { font-size: 12px; color: #8190a0; font-weight: 400; margin-left: 5px; }
+.empty-state { padding: 38px 20px; text-align: center; color: #718096; }
+.empty-state strong, .empty-state h3 { color: #25394d; }
+.empty-state p { max-width: 430px; margin: 10px auto 0; font-size: 12px; line-height: 1.6; }
+.job-list { display: grid; gap: 11px; margin-top: 18px; }
+.job-card { padding: 15px; border: 1px solid #e8edf1; border-radius: 9px; }
+.job-card-top, .job-actions { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.job-card-top strong { font-size: 13px; }.job-card-top p { font-size: 10px; color: #7e8b99; margin: 5px 0 0; }
+.job-source { background: #f2f5f7; border-radius: 20px; padding: 5px 8px; color: #728294; font-size: 9px; }
+.skill-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 13px 0; }
+.skill-chips span { padding: 5px 8px; background: #f1f6f5; border-radius: 20px; color: #527b72; font-size: 9px; }
+.job-actions { border-top: 1px solid #edf0f3; padding-top: 11px; color: #8492a0; font-size: 10px; }
+.job-actions a { color: #3974a4; font-size: 10px; }
+.match-result { display: flex; gap: 13px; align-items: flex-start; padding: 13px; margin-top: 12px; border-radius: 8px; background: #f5f8fb; }
+.score { min-width: 58px; display: grid; color: #245b7c; }.score strong { font-size: 25px; }.score small { font-size: 8px; color: #8495a3; }
+.match-result > div:last-child > strong { font-size: 10px; text-transform: capitalize; color: #355d73; }
+.match-result p { margin: 5px 0 0; color: #748392; font-size: 9px; line-height: 1.5; }
+.state.good { color: #43816f; }
+@media (max-width: 1050px) { .jobs-layout { grid-template-columns: 1fr; } }
+@media (max-width: 600px) { .form-two { grid-template-columns: 1fr; }.job-card-top, .job-actions { align-items: flex-start; flex-wrap: wrap; }.match-result { flex-direction: column; } }
