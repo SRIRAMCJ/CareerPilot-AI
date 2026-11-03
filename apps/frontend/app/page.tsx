@@ -18,6 +18,7 @@ type Match = { score: number; decision: string; matched_skills: string[]; missin
 type Application = { id: number; job_id: number; status: string; notes: string; next_action?: string | null; follow_up_date?: string | null; job_title: string; company: string };
 type ResumeItem = { id: number; filename: string; file_type: string; file_size: number; uploaded_at: string };
 type ResumeResult = ResumeItem & { extracted_text_length: number; extracted_skills: string[]; extracted_email?: string | null; extracted_phone?: string | null };
+type Interview = { id: number; application_id: number; title: string; event_type: string; starts_at: string; ends_at: string; timezone_name: string; meeting_url?: string | null; notes: string; job_title: string; company: string };
 const emptyProfile: Profile = {
   full_name: "", email: "", phone: "", location: "", headline: "", professional_summary: "",
   current_role: "", target_roles: [], preferred_locations: [], preferred_work_modes: [],
@@ -35,6 +36,8 @@ export default function Home() {
   const [profileLoading, setProfileLoading] = useState(true);
   const [jobs, setJobs] = useState<Job[]>([]);
   const [applications, setApplications] = useState<Application[]>([]);
+  const [interviews, setInterviews] = useState<Interview[]>([]);
+  const [interviewDraft, setInterviewDraft] = useState({ application_id: "", title: "", event_type: "interview", starts_at: "", ends_at: "", meeting_url: "", notes: "" });
   const [materialLinks, setMaterialLinks] = useState<Record<number, string>>({});
   const [resumes, setResumes] = useState<ResumeItem[]>([]);
   const [resumeResult, setResumeResult] = useState<ResumeResult | null>(null);
@@ -62,6 +65,14 @@ export default function Home() {
       setApiOnline(true);
     } catch { setApiOnline(false); }
     finally { setProfileLoading(false); }
+  }, []);
+
+  const loadInterviews = useCallback(async () => {
+    try {
+      const response = await fetch(`${API}/api/v1/interviews`);
+      if (!response.ok) throw new Error("Could not load interview events");
+      const data = await response.json(); setInterviews(data.items || []);
+    } catch { /* Scheduling is available when the local API is running. */ }
   }, []);
 
   const loadResumes = useCallback(async () => {
@@ -92,7 +103,7 @@ export default function Home() {
     } catch { setApiOnline(false); }
   }, []);
 
-  useEffect(() => { void loadProfile(); void loadJobs(); void loadApplications(); void loadResumes(); }, [loadProfile, loadJobs, loadApplications, loadResumes]);
+  useEffect(() => { void loadProfile(); void loadJobs(); void loadApplications(); void loadResumes(); void loadInterviews(); }, [loadProfile, loadJobs, loadApplications, loadResumes, loadInterviews]);
 
   async function saveProfile(event: FormEvent<HTMLFormElement>) {
     event.preventDefault(); setMessage("");
@@ -163,6 +174,24 @@ export default function Home() {
       await loadJobs();
     } catch (error) { setMessage(error instanceof Error ? error.message : "Discovery failed."); }
     finally { setDiscovering(false); }
+  }
+
+  async function scheduleInterview(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault(); setMessage("");
+    try {
+      const payload = {
+        ...interviewDraft,
+        application_id: Number(interviewDraft.application_id),
+        starts_at: new Date(interviewDraft.starts_at).toISOString(),
+        ends_at: new Date(interviewDraft.ends_at).toISOString(),
+        timezone_name: Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Kolkata",
+      };
+      const response = await fetch(`${API}/api/v1/interviews`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.detail?.[0]?.msg || data.detail || "Could not schedule event");
+      setInterviewDraft({ application_id: "", title: "", event_type: "interview", starts_at: "", ends_at: "", meeting_url: "", notes: "" });
+      setMessage("Interview or assessment added to your local calendar."); await loadInterviews();
+    } catch (error) { setMessage(error instanceof Error ? error.message : "Scheduling failed."); }
   }
 
   async function trackJob(jobId: number) {
@@ -310,7 +339,25 @@ export default function Home() {
               <div className="application-controls"><label>Status<select value={item.status} onChange={event => void updateApplicationStatus(item.id,event.target.value)}>{["saved","shortlisted","preparing","applied","assessment","interview","offer","rejected","withdrawn"].map(status => <option key={status} value={status}>{status.replace("_"," ")}</option>)}</select></label><button className="small-button" onClick={() => void generateMaterials(item.id)}>Generate application pack</button>{materialLinks[item.id] && <a href={`${API}${materialLinks[item.id]}`} target="_blank" rel="noreferrer">Download DOCX ↗</a>}<span className="application-note">Draft uses saved profile facts. Review before sending; no application is submitted.</span></div>
             </article>)}</div>}
         </section>}
-        {section === "interviews" && <section className="panel empty-state"><span className="eyebrow">INTERVIEW CENTER</span><h3>Interview scheduling is not connected.</h3><p>Calendar integration and reminders will be added after the application tracker. Candidate participation in interviews and assessments remains manual.</p></section>}
+        {section === "interviews" && <div className="jobs-layout"><section className="panel"><div className="panel-heading"><div><span className="eyebrow">INTERVIEW CENTER</span><h3>Upcoming events <span className="count">{interviews.length}</span></h3></div><button className="small-button" onClick={() => void loadInterviews()}>Refresh</button></div>
+          {interviews.length === 0 ? <div className="empty-state"><strong>No interviews or assessments scheduled</strong><p>Add an event using a tracked application. You can export each event to your calendar.</p></div> :
+            <div className="job-list">{interviews.map(item => <article className="job-card" key={item.id}><div className="job-card-top"><div><strong>{item.title}</strong><p>{item.job_title} · {item.company}</p></div><span className="job-source">{item.event_type.replace("_"," ")}</span></div>
+              <div className="interview-time">{new Date(item.starts_at).toLocaleString()} – {new Date(item.ends_at).toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"})} <span>{item.timezone_name}</span></div>
+              {item.notes && <p className="application-note">{item.notes}</p>}
+              <div className="job-actions"><span>Reminder preference: {30} min before</span><a href={`${API}/api/v1/interviews/${item.id}/calendar.ics`}>Add to calendar ↗</a>{item.meeting_url && <a href={item.meeting_url} target="_blank" rel="noreferrer">Join meeting ↗</a>}</div>
+            </article>)}</div>}
+        </section><section className="panel"><span className="eyebrow">SCHEDULE AN EVENT</span><h3>New interview or test</h3>
+          {applications.length === 0 ? <p className="form-intro">Track a job first in Job discovery or Applications.</p> : <form className="profile-form" onSubmit={scheduleInterview}>
+            <label>Application<select required value={interviewDraft.application_id} onChange={e => setInterviewDraft({...interviewDraft,application_id:e.target.value})}><option value="">Choose a tracked job</option>{applications.map(item => <option key={item.id} value={item.id}>{item.job_title} · {item.company}</option>)}</select></label>
+            <label>Event title<input required value={interviewDraft.title} onChange={e => setInterviewDraft({...interviewDraft,title:e.target.value})} placeholder="Technical interview round 1" /></label>
+            <label>Event type<select value={interviewDraft.event_type} onChange={e => setInterviewDraft({...interviewDraft,event_type:e.target.value})}><option value="interview">Interview</option><option value="assessment">Assessment / test</option><option value="recruiter_call">Recruiter call</option><option value="technical_round">Technical round</option><option value="other">Other</option></select></label>
+            <label>Start date and time<input required type="datetime-local" value={interviewDraft.starts_at} onChange={e => setInterviewDraft({...interviewDraft,starts_at:e.target.value})} /></label>
+            <label>End date and time<input required type="datetime-local" value={interviewDraft.ends_at} onChange={e => setInterviewDraft({...interviewDraft,ends_at:e.target.value})} /></label>
+            <label>Meeting URL (optional)<input type="url" value={interviewDraft.meeting_url} onChange={e => setInterviewDraft({...interviewDraft,meeting_url:e.target.value})} placeholder="https://..." /></label>
+            <label>Preparation notes<textarea rows={3} value={interviewDraft.notes} onChange={e => setInterviewDraft({...interviewDraft,notes:e.target.value})} /></label>
+            <button className="submit-button" type="submit">Save interview event</button>
+          </form>}
+        </section></div>}
         {section === "settings" && <section className="panel empty-state"><span className="eyebrow">LOCAL CONFIGURATION</span><h3>Integration controls</h3><p>API endpoint: <code>{API}</code></p><p>Browser automation, external account connections, and application submission remain disabled by default.</p></section>}
         <footer>CAREERPILOT AI <span>LOCAL-FIRST · BUILT FOR YOUR NEXT MOVE</span></footer>
       </section>
