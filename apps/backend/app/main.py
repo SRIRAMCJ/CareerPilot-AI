@@ -1,0 +1,48 @@
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
+from app.core.config import get_settings
+
+settings = get_settings()
+
+app = FastAPI(
+    title=settings.app_name,
+    version="0.1.0",
+    description="Local-first personal career workflow API.",
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[settings.frontend_origin],
+    allow_credentials=False,
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE"],
+    allow_headers=["Content-Type", "Authorization"],
+)
+
+
+@app.get("/api/v1/health", tags=["system"])
+def health_check() -> dict[str, str]:
+    """Liveness endpoint; does not expose environment variables or secrets."""
+    return {"status": "ok", "service": "careerpilot-api"}
+
+
+@app.get("/api/v1/system", tags=["system"])
+def system_status() -> dict[str, object]:
+    """Expose non-sensitive feature flags for the local dashboard."""
+    return {
+        "application": settings.app_name,
+        "version": app.version,
+        "environment": settings.app_env,
+        "ai_provider": settings.ai_provider,
+        "integrations": {
+            "gmail": settings.gmail_enabled,
+            "google_calendar": settings.google_calendar_enabled,
+            "browser_automation": settings.browser_automation_enabled,
+            "application_submission": settings.application_submission_enabled,
+        },
+    }
+
+
+@app.get("/", include_in_schema=False)
+def root() -> dict[str, str]:
+    return {"message": "CareerPilot AI API", "docs": "/docs"}
