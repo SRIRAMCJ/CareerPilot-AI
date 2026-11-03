@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, type FormEvent } from "react";
+import Link from "next/link";
 
 const API = process.env.NEXT_PUBLIC_API_BASE_URL || "http://127.0.0.1:8000";
 type BoardLink = { provider: string; url: string; mode: string };
@@ -136,7 +137,7 @@ export default function IntegrationsPage() {
         .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px} a{color:#8db6ff;overflow-wrap:anywhere}
         small,.muted{color:#91a0ba} h1{font-size:30px;margin-bottom:8px} h2{font-size:19px;margin:0 0 8px} .item{padding:12px 0;border-top:1px solid #273550}
       `}</style>
-      <a href="/" style={{ textDecoration: "none" }}>← CareerPilot dashboard</a>
+      <Link href="/" style={{ textDecoration: "none" }}>← CareerPilot dashboard</Link>
       <h1>CareerPilot integrations</h1>
       <p className="muted">Job-board search, browser-assisted application preparation and recruiter communication.</p>
       {message && <div className="panel" role="status">{message}</div>}
