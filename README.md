@@ -16,7 +16,7 @@ A local-first personal career workspace for discovering jobs, matching opportuni
 
 ## Technology
 
-- Backend: Python 3.11+, FastAPI, Pydantic, SQLite, HTTPX.
+- Backend: Python 3.10+, FastAPI, Pydantic, SQLite, HTTPX.
 - Resume and document handling: pypdf and python-docx.
 - Frontend: Next.js 15, React 19, TypeScript.
 - Runtime: Windows 11 local-first workflow; backend binds to loopback by default.
