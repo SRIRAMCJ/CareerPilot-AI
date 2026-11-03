@@ -54,6 +54,18 @@ def initialize_database(path: Path | None = None) -> None:
         )
         connection.execute(
             """
+            CREATE TABLE IF NOT EXISTS generated_materials (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                application_id INTEGER NOT NULL REFERENCES applications(id),
+                material_type TEXT NOT NULL,
+                filename TEXT NOT NULL,
+                stored_path TEXT NOT NULL,
+                created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+            )
+            """
+        )
+        connection.execute(
+            """
             CREATE TABLE IF NOT EXISTS resumes (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 filename TEXT NOT NULL,
