@@ -70,8 +70,8 @@ def update_interview(event_id: int, item: InterviewUpdate) -> dict[str, Any] | N
     if current is None:
         return None
     merged = {**current, **changes}
-    starts = datetime.fromisoformat(merged["starts_at"])
-    ends = datetime.fromisoformat(merged["ends_at"])
+    starts = datetime.fromisoformat(str(merged["starts_at"]).replace("Z", "+00:00"))
+    ends = datetime.fromisoformat(str(merged["ends_at"]).replace("Z", "+00:00"))
     if starts.tzinfo is None or starts.utcoffset() is None or ends.tzinfo is None or ends.utcoffset() is None:
         raise ValueError("Interview dates must include timezone offsets.")
     if ends <= starts:
