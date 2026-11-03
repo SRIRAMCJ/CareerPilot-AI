@@ -4,8 +4,8 @@ from docx import Document
 from fastapi.testclient import TestClient
 
 from app.core import database
-from app.routers import resumes
 from app.main import app
+from app.routers import resumes
 from app.services.resume_parser import extract_facts
 
 client = TestClient(app)
