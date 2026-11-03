@@ -20,11 +20,14 @@ def job_board_search_links(
     """Build search links; authenticated job-board pages are not scraped."""
     encoded_query = quote_plus(query.strip())
     encoded_location = quote_plus(location.strip())
+    naukri_query = encoded_query.replace("+", "-").lower()
+    naukri_location = encoded_location.replace("+", "-").lower()
     return {
         "query": query.strip(), "location": location.strip(),
         "items": [
             {"provider": provider, "url": template.format(
-                query=encoded_query, location=encoded_location),
+                query=naukri_query if provider == "naukri" else encoded_query,
+                location=naukri_location if provider == "naukri" else encoded_location),
              "mode": "user_session"}
             for provider, template in BOARD_TEMPLATES.items()
         ],
