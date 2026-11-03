@@ -59,7 +59,7 @@ def generate_application_pack(profile: dict, job: dict, output_dir: Path) -> dic
     verified_skills = ", ".join(skills)
     if verified_skills:
         document.add_paragraph(
-            f"My profile lists experience and skills in {verified_skills}. "
+            f"My profile lists skills in {verified_skills}. "
             "I would welcome the opportunity to discuss how this verified background aligns with your requirements."
         )
     if summary:
