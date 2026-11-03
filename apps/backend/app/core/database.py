@@ -30,6 +30,17 @@ def initialize_database(path: Path | None = None) -> None:
         )
         connection.execute(
             """
+            CREATE TABLE IF NOT EXISTS job_source_boards (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                provider TEXT NOT NULL,
+                company_slug TEXT NOT NULL,
+                created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE(provider, company_slug)
+            )
+            """
+        )
+        connection.execute(
+            """
             CREATE TABLE IF NOT EXISTS job_listings (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 title TEXT NOT NULL,
