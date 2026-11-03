@@ -52,6 +52,21 @@ def initialize_database(path: Path | None = None) -> None:
             )
             """
         )
+        connection.execute(
+            """
+            CREATE TABLE IF NOT EXISTS applications (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                job_id INTEGER NOT NULL REFERENCES job_listings(id),
+                status TEXT NOT NULL DEFAULT 'saved',
+                notes TEXT NOT NULL DEFAULT '',
+                applied_date TEXT,
+                next_action TEXT,
+                follow_up_date TEXT,
+                created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+            )
+            """
+        )
 
 
 def save_profile(profile: CandidateProfile, path: Path | None = None) -> dict[str, Any]:
