@@ -35,6 +35,7 @@ export default function Home() {
   const [profileExists, setProfileExists] = useState(false);
   const [profileLoading, setProfileLoading] = useState(true);
   const [jobs, setJobs] = useState<Job[]>([]);
+  const [jobSearch, setJobSearch] = useState("");
   const [applications, setApplications] = useState<Application[]>([]);
   const [interviews, setInterviews] = useState<Interview[]>([]);
   const [interviewDraft, setInterviewDraft] = useState({ application_id: "", title: "", event_type: "interview", starts_at: "", ends_at: "", meeting_url: "", notes: "", reminder_minutes: 30 });
@@ -95,13 +96,13 @@ export default function Home() {
 
   const loadJobs = useCallback(async () => {
     try {
-      const response = await fetch(`${API}/api/v1/jobs`);
+      const response = await fetch(`${API}/api/v1/jobs${jobSearch.trim() ? `?search=${encodeURIComponent(jobSearch.trim())}` : ""}`);
       if (!response.ok) throw new Error("Could not load jobs");
       const data = await response.json();
       setJobs(data.items || []);
       setApiOnline(true);
     } catch { setApiOnline(false); }
-  }, []);
+  }, [jobSearch]);
 
   useEffect(() => { void loadProfile(); void loadJobs(); void loadApplications(); void loadResumes(); void loadInterviews(); }, [loadProfile, loadJobs, loadApplications, loadResumes, loadInterviews]);
 
@@ -327,6 +328,7 @@ export default function Home() {
         </section>}
 
         {section === "jobs" && <div className="jobs-layout"><section className="panel"><div className="panel-heading"><div><span className="eyebrow">OPPORTUNITY DATABASE</span><h3>Saved jobs <span className="count">{jobs.length}</span></h3></div><button className="small-button" onClick={() => void loadJobs()}>Refresh</button></div>
+          <input className="job-search" value={jobSearch} onChange={event => setJobSearch(event.target.value)} placeholder="Search title, company or location…" aria-label="Search saved jobs" />
           {jobs.length === 0 ? <div className="empty-state"><strong>No opportunities saved yet</strong><p>Add a job using the form. External job-source connectors are the next development phase.</p></div> :
             <div className="job-list">{jobs.map(job => <article className="job-card" key={job.id}><div className="job-card-top"><div><strong>{job.title}</strong><p>{job.company} · {job.location || "Location not specified"}</p></div><span className="job-source">{job.source}</span></div>
               <div className="skill-chips">{job.required_skills.map(skill => <span key={skill}>{skill}</span>)}</div>
