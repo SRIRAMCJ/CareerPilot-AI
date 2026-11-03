@@ -69,6 +69,28 @@ The backend CORS origin defaults to `http://localhost:3000`.
 - Application tracking and status updates.
 - External account automation and application submission remain disabled.
 
+## Optional daily job scan
+
+After adding company boards in the Job Discovery watchlist, you can run a scan manually:
+
+```powershell
+.\scripts\scan-watchlist.ps1
+```
+
+To register a Windows Task Scheduler job (default 9:00 AM local time):
+
+```powershell
+.\scripts\register-daily-scan.ps1 -Time "09:00"
+```
+
+The scheduled task starts the local API, scans saved public boards, records results under `$HOME\.careerpilot\logs\watchlist-scan.log`, and stops the API it started. It runs while your Windows account is logged in. Remove it with:
+
+```powershell
+Unregister-ScheduledTask -TaskName "CareerPilot-Daily-Job-Scan" -Confirm:$false
+```
+
+This automation only discovers and saves job listings. It never submits applications or sends messages.
+
 ## Tests
 
 ```powershell
