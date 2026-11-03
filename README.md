@@ -59,3 +59,16 @@ The discovery endpoint fetches public postings, normalizes the listing, saves it
 ### Local development
 
 Install backend dependencies from `apps/backend` with `pip install -e ".[dev]"`. Start the API with `uvicorn app.main:app --reload --host 127.0.0.1 --port 8000`. Start the frontend from `apps/frontend` with `npm install` and `npm run dev`.
+
+
+## Current local-first features
+
+- Candidate profile CRUD and preferences in SQLite.
+- PDF/DOCX resume import, text extraction, skill/contact hints, and local deletion.
+- Public job-board discovery from Greenhouse, Lever, and Ashby.
+- Local opportunity search, duplicate detection, and explainable profile matching.
+- Application pipeline with notes and follow-up dates.
+- Per-application DOCX resume and cover-letter draft generation from saved profile facts.
+- Interview and assessment scheduling with timezone-aware calendar export and reminder alarms.
+
+See [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) to run the application. See the roadmap for integrations that still require implementation, credentials, or platform-specific permission review.
