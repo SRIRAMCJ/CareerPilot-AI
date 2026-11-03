@@ -1,5 +1,5 @@
-from fastapi import APIRouter, HTTPException
 import httpx
+from fastapi import APIRouter, HTTPException
 
 from app.core.jobs_database import create_job
 from app.schemas.discovery import DiscoveryRequest
