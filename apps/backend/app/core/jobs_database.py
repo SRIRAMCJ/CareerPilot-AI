@@ -2,13 +2,13 @@ import json
 import sqlite3
 from typing import Any
 
-from app.core.database import database_path, initialize_database
+from app.core import database
 from app.schemas.job import JobListingCreate
 
 
 def _connect() -> sqlite3.Connection:
-    initialize_database()
-    connection = sqlite3.connect(database_path())
+    database.initialize_database()
+    connection = sqlite3.connect(database.database_path())
     connection.row_factory = sqlite3.Row
     return connection
 
