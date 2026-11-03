@@ -156,14 +156,14 @@ def search_gmail_messages(
     for item in result.get("messages", []):
         message = service.users().messages().get(
             userId="me", id=item["id"], format="metadata",
-            metadataHeaders=["From", "To", "Subject", "Date"],
+            metadataHeaders=["From", "To", "Subject", "Date", "Message-ID", "References"],
         ).execute()
         headers = {h["name"].lower(): h["value"] for h in message.get("payload", {}).get("headers", [])}
         items.append({
             "id": message["id"], "thread_id": message.get("threadId"),
             "from": headers.get("from", ""), "to": headers.get("to", ""),
             "subject": headers.get("subject", "(no subject)"),
-            "date": headers.get("date", ""), "snippet": message.get("snippet", ""),
+            "date": headers.get("date", ""), "snippet": message.get("snippet", ""),\n            "message_id_header": headers.get("message-id", ""),\n            "references_header": headers.get("references", ""),
         })
     return {"items": items, "next_page_token": result.get("nextPageToken")}
 
