@@ -43,9 +43,9 @@ For manual setup, troubleshooting, daily scanning, and tests, read [docs/DEVELOP
 | PDF/DOCX resume parsing | Partial | Selectable text only; scanned PDF OCR not included |
 | Matching and eligibility | Implemented | Deterministic and explainable; skill extraction is heuristic |
 | Application preparation | Partial | DOCX drafts from saved profile facts; candidate review required |
-| Application submission | Unavailable | No automated submission or browser automation |
-| LinkedIn, Naukri, Indeed, Foundit, Google Jobs | Unavailable | No approved connector configured |
-| Gmail and recruiter email | Unavailable | OAuth and email workflows not implemented |
+| Application form assistance | Partial | Visible Playwright browser fills safe profile fields; explicit submit gate is disabled by default |
+| LinkedIn, Naukri, Indeed, Foundit | Search links | User-session search links; no private-page scraping or unrestricted API assumption |
+| Gmail and recruiter email | Implemented, requires setup | OAuth inbox search, drafts and explicitly confirmed sending |
 | Google Calendar | Partial | ICS export supported; direct Calendar OAuth/sync not implemented |
 | Local LLM | Partial | Optional loopback-only Ollama cover-letter drafts; deterministic workflows work without a model |
 
@@ -55,6 +55,6 @@ Candidate profiles, resumes, extracted resume text, generated documents, and dat
 
 CareerPilot does not bypass CAPTCHA, anti-bot protections, login restrictions, or rate limits. It does not invent candidate qualifications, submit legal declarations, pay application fees, or complete identity-bound assessments/interviews. Generated documents must be reviewed before use.
 
-## Roadmap
+## External integrations\n\nSee [docs/EXTERNAL_INTEGRATIONS.md](docs/EXTERNAL_INTEGRATIONS.md) for Gmail OAuth setup, job-board search links, browser-assisted form preparation, and submission safety controls. The dashboard is available at `/integrations`.\n\n## Roadmap
 
 See [docs/ROADMAP.md](docs/ROADMAP.md) for completed milestones and remaining work. In particular, authenticated job-board integrations, actual application submission, Gmail, direct Google Calendar sync, audit logging, encrypted backup, and full end-to-end runtime verification remain release work.
