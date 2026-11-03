@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import get_settings
+from app.routers.profile import router as profile_router
 
 settings = get_settings()
 
@@ -10,6 +11,8 @@ app = FastAPI(
     version="0.1.0",
     description="Local-first personal career workflow API.",
 )
+
+app.include_router(profile_router)
 
 app.add_middleware(
     CORSMiddleware,
