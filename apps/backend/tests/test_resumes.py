@@ -1,12 +1,11 @@
-from fastapi.testclient import TestClient
-from docx import Document
 from io import BytesIO
 
-from app.core import database
-from app.core import resume_database
-from app.main import app
-from app.services.resume_parser import extract_facts, extract_text
+from docx import Document
+from fastapi.testclient import TestClient
 
+from app.core import database, resume_database
+from app.main import app
+from app.services.resume_parser import extract_facts
 client = TestClient(app)
 
 
