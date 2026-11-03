@@ -56,3 +56,25 @@ def test_match_requires_profile_then_returns_explanation(tmp_path, monkeypatch):
     assert match.json()["score"] >= 60
     assert match.json()["matched_skills"] == ["fastapi", "python"]
     assert match.json()["missing_skills"] == ["kubernetes"]
+
+
+def test_match_marks_salary_and_work_mode_conflicts_as_ineligible(tmp_path, monkeypatch):
+    configure_db(tmp_path, monkeypatch)
+    job = client.post("/api/v1/jobs", json={
+        "title": "AI Engineer", "company": "Example Labs", "location": "Bengaluru",
+        "work_mode": "On-site", "salary_min": 300000, "salary_max": 500000,
+        "required_skills": ["Python"],
+    }).json()
+    client.put("/api/v1/profile", json={
+        "full_name": "Test Candidate",
+        "target_roles": ["AI Engineer"],
+        "preferred_locations": ["Chennai"],
+        "preferred_work_modes": ["Remote"],
+        "minimum_salary": 800000,
+        "skills": ["Python"],
+    })
+    match = client.get(f"/api/v1/jobs/{job['id']}/match")
+    assert match.status_code == 200
+    assert match.json()["eligible"] is False
+    assert match.json()["decision"] == "not_eligible"
+    assert len(match.json()["blocking_reasons"]) == 3
