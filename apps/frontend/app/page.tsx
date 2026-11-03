@@ -251,7 +251,7 @@ export default function Home() {
   const updateList = (key: "target_roles" | "preferred_locations" | "preferred_work_modes" | "skills" | "tools_and_technologies" | "preferred_job_types", value: string) =>
     setProfile((current) => ({ ...current, [key]: splitList(value) }));
   const updateParagraphList = (key: "education" | "experience" | "projects" | "certifications", value: string) =>
-    setProfile(current => ({ ...current, [key]: value.split("\\n").map(line => line.trim()).filter(Boolean) }));
+    setProfile(current => ({ ...current, [key]: value.split("\n").map(line => line.trim()).filter(Boolean) }));
 
   return (
     <main className="shell">
@@ -307,10 +307,10 @@ export default function Home() {
             <label>Tools and technologies<input value={profile.tools_and_technologies.join(", ")} onChange={e => updateList("tools_and_technologies",e.target.value)} placeholder="Next.js, PostgreSQL, Ollama" /></label>
             <label>Preferred job types<input value={profile.preferred_job_types.join(", ")} onChange={e => updateList("preferred_job_types",e.target.value)} placeholder="Full-time, Contract" /></label>
             <div className="form-two"><label>Years of experience<input type="number" min="0" max="60" step="0.5" value={profile.years_experience ?? ""} onChange={e => setProfile({...profile,years_experience:e.target.value ? Number(e.target.value) : null})} /></label><label>Notice period<input value={profile.notice_period} onChange={e => setProfile({...profile,notice_period:e.target.value})} placeholder="Immediate, 30 days" /></label></div>
-            <label>Education <small>One entry per line</small><textarea rows={3} value={profile.education.join("\\n")} onChange={e => updateParagraphList("education",e.target.value)} placeholder="B.Tech in Artificial Intelligence and Data Science" /></label>
-            <label>Professional experience <small>One verified role or achievement per line</small><textarea rows={4} value={profile.experience.join("\\n")} onChange={e => updateParagraphList("experience",e.target.value)} placeholder="AI Engineer — Company — dates and responsibilities" /></label>
-            <label>Projects <small>One project per line</small><textarea rows={4} value={profile.projects.join("\\n")} onChange={e => updateParagraphList("projects",e.target.value)} placeholder="Project name — technologies — verified outcome" /></label>
-            <label>Certifications <small>One certification per line</small><textarea rows={3} value={profile.certifications.join("\\n")} onChange={e => updateParagraphList("certifications",e.target.value)} placeholder="Certification name — issuer — year" /></label>
+            <label>Education <small>One entry per line</small><textarea rows={3} value={profile.education.join("\n")} onChange={e => updateParagraphList("education",e.target.value)} placeholder="B.Tech in Artificial Intelligence and Data Science" /></label>
+            <label>Professional experience <small>One verified role or achievement per line</small><textarea rows={4} value={profile.experience.join("\n")} onChange={e => updateParagraphList("experience",e.target.value)} placeholder="AI Engineer — Company — dates and responsibilities" /></label>
+            <label>Projects <small>One project per line</small><textarea rows={4} value={profile.projects.join("\n")} onChange={e => updateParagraphList("projects",e.target.value)} placeholder="Project name — technologies — verified outcome" /></label>
+            <label>Certifications <small>One certification per line</small><textarea rows={3} value={profile.certifications.join("\n")} onChange={e => updateParagraphList("certifications",e.target.value)} placeholder="Certification name — issuer — year" /></label>
             <button className="submit-button" type="submit">Save profile locally</button>
           </form>}
           <div className="resume-panel">
