@@ -19,9 +19,14 @@ class Settings(BaseSettings):
     careerpilot_resume_dir: str | None = None
     careerpilot_generated_dir: str | None = None
     gmail_enabled: bool = False
-    google_calendar_enabled: bool = False
+    gmail_client_id: str = ""
+    gmail_client_secret: str = ""
+    gmail_redirect_uri: str = "http://127.0.0.1:8000/api/v1/gmail/auth/callback"
+    gmail_token_path: str = ""
     browser_automation_enabled: bool = False
+    browser_profile_dir: str = ""
     application_submission_enabled: bool = False
+    google_calendar_enabled: bool = False
 
     model_config = SettingsConfigDict(
         env_file=Path(__file__).resolve().parents[4] / ".env",
