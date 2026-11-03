@@ -55,6 +55,10 @@ Candidate profiles, resumes, extracted resume text, generated documents, and dat
 
 CareerPilot does not bypass CAPTCHA, anti-bot protections, login restrictions, or rate limits. It does not invent candidate qualifications, submit legal declarations, pay application fees, or complete identity-bound assessments/interviews. Generated documents must be reviewed before use.
 
-## External integrations\n\nSee [docs/EXTERNAL_INTEGRATIONS.md](docs/EXTERNAL_INTEGRATIONS.md) for Gmail OAuth setup, job-board search links, browser-assisted form preparation, and submission safety controls. The dashboard is available at `/integrations`.\n\n## Roadmap
+## External integrations
 
-See [docs/ROADMAP.md](docs/ROADMAP.md) for completed milestones and remaining work. In particular, authenticated job-board integrations, actual application submission, Gmail, direct Google Calendar sync, audit logging, encrypted backup, and full end-to-end runtime verification remain release work.
+See [docs/EXTERNAL_INTEGRATIONS.md](docs/EXTERNAL_INTEGRATIONS.md) for Gmail OAuth setup, job-board search links, browser-assisted form preparation, and submission safety controls. The dashboard is available at `/integrations`.
+
+## Roadmap
+
+See [docs/ROADMAP.md](docs/ROADMAP.md) for completed milestones and remaining work. In particular, official authenticated job-board APIs and per-platform application adapters, fully autonomous application submission, direct Google Calendar sync, formal application state machine, encrypted backup, and full end-to-end runtime verification remain release work.
