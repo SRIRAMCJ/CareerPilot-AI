@@ -28,7 +28,7 @@
 - [x] Match reason display
 
 ## Phase 5 — Application preparation
-- [ ] Resume versioning
+- [x] Per-application DOCX resume and cover-letter draft generation (profile-fact grounded; user review required)
 - [x] Deterministic DOCX resume and cover-letter draft generation from verified profile facts
 - [x] Generation restricted to saved candidate facts; user review required
 - [ ] Application answer evidence mapping
@@ -45,6 +45,7 @@
 - [ ] Recruiter email classification
 - [ ] Draft replies
 - [x] Local interview/assessment scheduler with timezone-aware ICS export
+- [x] Local interview and assessment scheduler with timezone-aware ICS export
 - [ ] Google Calendar OAuth
 - [ ] Timezone-aware scheduling and conflict detection
 
