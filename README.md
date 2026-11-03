@@ -33,7 +33,7 @@ From the repository root:
 
 Open the dashboard at `http://localhost:3000` and API documentation at `http://127.0.0.1:8000/docs`.
 
-For manual setup, troubleshooting, daily scanning, and tests, read [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md).
+For manual setup, troubleshooting, daily scanning, and tests, read [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md). Use [docs/ACCEPTANCE_TESTS.md](docs/ACCEPTANCE_TESTS.md) to verify the end-to-end local workflow.
 
 ## Integration status
 
