@@ -33,3 +33,26 @@ def test_application_requires_existing_job(tmp_path, monkeypatch):
     monkeypatch.setattr(database, "database_path", lambda: tmp_path / "tracker.db")
     response = client.post("/api/v1/applications", json={"job_id": 999})
     assert response.status_code == 409
+
+
+def test_application_status_transitions_are_enforced_and_audited(tmp_path, monkeypatch):
+    monkeypatch.setattr(database, "database_path", lambda: tmp_path / "workflow.db")
+    job = client.post("/api/v1/jobs", json={
+        "title": "AI Engineer", "company": "Workflow Co", "source": "manual"
+    }).json()
+    created = client.post("/api/v1/applications", json={"job_id": job["id"]})
+    application_id = created.json()["id"]
+
+    invalid = client.patch(f"/api/v1/applications/{application_id}", json={"status": "applied"})
+    assert invalid.status_code == 409
+    assert "saved -> applied" in invalid.json()["detail"]
+
+    preparing = client.patch(f"/api/v1/applications/{application_id}", json={"status": "preparing"})
+    assert preparing.status_code == 200
+    ready = client.patch(f"/api/v1/applications/{application_id}", json={"status": "ready_to_submit"})
+    assert ready.status_code == 200
+    applied = client.patch(f"/api/v1/applications/{application_id}", json={"status": "applied"})
+    assert applied.status_code == 200
+
+    terminal = client.patch(f"/api/v1/applications/{application_id}", json={"status": "saved"})
+    assert terminal.status_code == 409
