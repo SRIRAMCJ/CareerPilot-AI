@@ -116,3 +116,15 @@ button { cursor: pointer; }
 .discovery-form { margin: 15px 0 18px; }
 .source-disclaimer { padding: 11px 12px; border-radius: 7px; background: #f5f7f9; color: #7e8c99; font-size: 9px; line-height: 1.55; }
 .submit-button:disabled { opacity: .6; cursor: wait; }
+
+.resume-panel { margin-top: 24px; padding-top: 22px; border-top: 1px solid #edf0f3; }
+.resume-upload { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.resume-upload input { max-width: 100%; font-size: 11px; color: #718096; }
+.resume-result { margin-top: 16px; padding: 14px; border: 1px solid #dce9e5; background: #f6faf8; border-radius: 8px; }
+.resume-result > strong { color: #355d55; font-size: 12px; }
+.resume-result p { margin: 7px 0; color: #74868a; font-size: 10px; line-height: 1.5; }
+.resume-list { display: grid; gap: 8px; margin-top: 14px; }
+.resume-item { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 11px 0; border-bottom: 1px solid #edf0f3; }
+.resume-item > div { display: grid; gap: 4px; min-width: 0; }
+.resume-item strong { color: #42566a; font-size: 11px; overflow-wrap: anywhere; }
+.resume-item small { color: #8b99a6; font-size: 9px; }
