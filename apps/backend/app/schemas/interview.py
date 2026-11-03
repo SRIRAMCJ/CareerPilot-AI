@@ -52,6 +52,9 @@ class InterviewUpdate(BaseModel):
 
     @model_validator(mode="after")
     def validate_time_pair(self):
+        for field in ("title", "event_type", "starts_at", "ends_at", "timezone_name", "notes", "reminder_minutes"):
+            if field in self.model_fields_set and getattr(self, field) is None:
+                raise ValueError(f"{field} cannot be null.")
         if self.starts_at is not None and (self.starts_at.tzinfo is None or self.starts_at.utcoffset() is None):
             raise ValueError("starts_at must include a timezone offset.")
         if self.ends_at is not None and (self.ends_at.tzinfo is None or self.ends_at.utcoffset() is None):
