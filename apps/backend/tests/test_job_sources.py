@@ -45,3 +45,36 @@ def test_ashby_adapter_normalizes_public_postings(monkeypatch):
     assert jobs[0]["work_mode"] == "Remote"
     assert jobs[0]["posted_date"] == "2026-11-01"
     assert jobs[0]["required_skills"] == ["Python", "RAG"]
+
+
+def test_workable_adapter_normalizes_public_jobs(monkeypatch):
+    class FakeResponse:
+        def raise_for_status(self):
+            return None
+
+        def json(self):
+            return {"name": "Example Systems", "jobs": [{
+                "title": "Backend Engineer", "code": "BE-1",
+                "city": "Chennai", "state": "Tamil Nadu", "country": "India",
+                "workplace_type": "hybrid", "employment_type": "Full-time",
+                "description": "<p>Python, FastAPI and PostgreSQL</p>",
+                "published_on": "2026-10-28",
+                "application_url": "https://example.workable.com/jobs/1",
+            }]}
+
+    class FakeClient:
+        async def __aenter__(self):
+            return self
+
+        async def __aexit__(self, *args):
+            return None
+
+        async def get(self, *args, **kwargs):
+            return FakeResponse()
+
+    monkeypatch.setattr(job_sources.httpx, "AsyncClient", lambda **kwargs: FakeClient())
+    jobs = asyncio.run(job_sources.fetch_workable("example", 10))
+    assert jobs[0]["company"] == "Example Systems"
+    assert jobs[0]["work_mode"] == "Hybrid"
+    assert jobs[0]["location"] == "Chennai, Tamil Nadu, India"
+    assert jobs[0]["required_skills"] == ["Python", "FastAPI", "PostgreSQL"]
