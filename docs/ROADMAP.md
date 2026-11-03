@@ -16,7 +16,7 @@
 
 ## Phase 3 — Job discovery
 - [x] Initial public-source adapter boundary
-- [x] Greenhouse and Lever public board connectors
+- [x] Greenhouse, Lever, Ashby, and Workable public board connectors
 - [x] Initial listing normalization
 - [x] Source ID duplicate detection
 - [ ] Source access and terms review per adapter
