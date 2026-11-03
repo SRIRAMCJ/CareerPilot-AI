@@ -181,6 +181,7 @@ export default function Home() {
     try {
       const payload = {
         ...interviewDraft,
+        meeting_url: interviewDraft.meeting_url || null,
         application_id: Number(interviewDraft.application_id),
         starts_at: new Date(interviewDraft.starts_at).toISOString(),
         ends_at: new Date(interviewDraft.ends_at).toISOString(),
