@@ -3,7 +3,8 @@ from io import BytesIO
 from docx import Document
 from fastapi.testclient import TestClient
 
-from app.core import database, resume_database
+from app.core import database
+from app.routers import resumes
 from app.main import app
 from app.services.resume_parser import extract_facts
 
@@ -13,7 +14,7 @@ client = TestClient(app)
 def test_resume_text_extraction_and_fact_preview(tmp_path, monkeypatch):
     db_path = tmp_path / "resume.db"
     monkeypatch.setattr(database, "database_path", lambda: db_path)
-    monkeypatch.setattr(resume_database, "local_resume_directory", lambda: tmp_path / "resumes")
+    monkeypatch.setattr(resumes, "local_resume_directory", lambda: tmp_path / "resumes")
 
     document = Document()
     document.add_paragraph("Sriram V")
