@@ -4,7 +4,7 @@
 
 - Windows 11
 - Git
-- Python 3.11+
+- Python 3.10+
 - Node.js 22+
 - npm
 
@@ -33,7 +33,7 @@ The setup script creates the backend virtual environment, installs Python and np
 
 ```powershell
 cd apps/backend
-py -3.11 -m venv .venv
+py -3.10 -m venv .venv
 .\.venv\Scripts\Activate.ps1
 python -m pip install --upgrade pip
 pip install -e ".[dev]"
