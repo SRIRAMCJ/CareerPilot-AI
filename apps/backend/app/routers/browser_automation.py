@@ -77,7 +77,13 @@ def _field_value(descriptor: str, profile: dict) -> str | None:
         return profile.get("email")
     if any(term in key for term in ("phone", "mobile", "telephone")):
         return profile.get("phone")
-    if any(term in key for term in ("full name", "fullname", "your name", "candidate name", "name")):
+    if any(term in key for term in ("first_name", "first name", "given_name", "given name")):
+        return (profile.get("full_name") or "").split(" ", 1)[0]
+    if any(term in key for term in ("last_name", "last name", "family_name", "family name")):
+        return (profile.get("full_name") or "").partition(" ")[2]
+    if any(term in key for term in ("full name", "fullname", "your name", "candidate name")):
+        return profile.get("full_name")
+    if key.strip() in {"name", "yourname", "applicant_name"}:
         return profile.get("full_name")
     if any(term in key for term in ("location", "city", "current address")):
         return profile.get("location")
@@ -95,7 +101,7 @@ def _fill_visible_fields(page, profile: dict) -> tuple[list[str], list[str]]:
     for index in range(min(fields.count(), 100)):
         field = fields.nth(index)
         try:
-            if not field.is_visible() or field.is_disabled() or field.is_readonly():
+            if not field.is_visible() or field.is_disabled() or not field.is_editable():
                 continue
             kind = (field.get_attribute("type") or "text").casefold()
             if kind in {"checkbox", "radio", "file", "password", "submit", "button"}:
@@ -117,7 +123,7 @@ def _fill_visible_fields(page, profile: dict) -> tuple[list[str], list[str]]:
 
 
 @router.post("/applications/{application_id}/prepare")
-def prepare_application_form(application_id: int) -> dict:
+async def prepare_application_form(application_id: int) -> dict:
     application = get_application(application_id)
     if not application:
         raise HTTPException(status_code=404, detail="Application tracker not found.")
@@ -148,7 +154,7 @@ def prepare_application_form(application_id: int) -> dict:
 
 
 @router.post("/applications/{application_id}/submit")
-def submit_application(application_id: int, request: SubmissionConfirmation) -> dict:
+async def submit_application(application_id: int, request: SubmissionConfirmation) -> dict:
     settings = get_settings()
     if not settings.application_submission_enabled:
         raise HTTPException(status_code=403, detail="Application submission is disabled. Set APPLICATION_SUBMISSION_ENABLED=true after reviewing the safety guidance.")
