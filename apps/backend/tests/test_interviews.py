@@ -30,6 +30,7 @@ def test_interview_schedule_and_calendar_export(tmp_path, monkeypatch):
     assert calendar.status_code == 200
     assert "BEGIN:VCALENDAR" in calendar.text
     assert "DTSTART:20261112T043000Z" in calendar.text
+    assert "TRIGGER:-PT30M" in calendar.text
 
     assert client.patch(f"/api/v1/interviews/{event_id}", json={"title": "Final technical round"}).status_code == 200
     assert client.delete(f"/api/v1/interviews/{event_id}").status_code == 200
