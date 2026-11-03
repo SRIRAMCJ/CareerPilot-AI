@@ -4,6 +4,15 @@
 
 CareerPilot AI is a local-first career workflow application. The foundation should not require an LLM, remote server, or paid API.
 
+## Current implementation
+
+- Next.js/TypeScript dashboard.
+- FastAPI backend with SQLite persistence for candidate profiles, jobs, applications, resumes, generated materials, company-board watchlists, and interview events.
+- Public company-board adapters for Greenhouse, Lever, Ashby, and Workable.
+- Deterministic matching and profile-fact-based DOCX generation.
+- Optional local Ollama cover-letter drafting, restricted to loopback endpoints.
+- Local ICS calendar export and optional Windows Task Scheduler job scans.
+
 ## Logical components
 
 1. **Candidate profile** — verified facts, preferences, and source evidence.
@@ -20,7 +29,11 @@ CareerPilot AI is a local-first career workflow application. The foundation shou
 
 Define an AI provider interface only when a feature requires generation or semantic interpretation. Start with deterministic implementations and tests. Add Ollama or a cloud provider behind the same interface later. Provider failure must never bypass eligibility, consent, or submission rules.
 
-## Application state machine
+## Planned application state machine
+
+The dashboard currently has a simple application status tracker. The full auditable state machine below is a future release requirement, not yet implemented.
+
+
 
 `DISCOVERED -> NORMALIZED -> DEDUPLICATED -> ELIGIBILITY_CHECKED -> SCORED -> SHORTLISTED -> MATERIALS_PREPARED -> VALIDATED -> READY_TO_SUBMIT -> SUBMITTED -> CONFIRMATION_VERIFIED`
 
