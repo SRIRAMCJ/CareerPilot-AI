@@ -1,3 +1,6 @@
+import asyncio
+
+from app.services import job_sources
 from app.services.job_sources import _skills, html_to_text
 
 
@@ -7,11 +10,6 @@ def test_html_to_text_removes_markup_and_normalizes_whitespace():
 
 def test_skill_extraction_uses_token_boundaries():
     assert _skills("Experience with JavaScript and Python") == ["Python", "JavaScript"]
-
-
-import asyncio
-
-from app.services import job_sources
 
 
 def test_ashby_adapter_normalizes_public_postings(monkeypatch):
