@@ -20,6 +20,7 @@
 - [x] Job listing normalization and keyword extraction
 - [x] Source ID duplicate detection
 - [x] Manual job capture and local title/company/location search
+- [x] Persistent company-board watchlist and one-click multi-board scan
 - [ ] Broader employer-board catalog and adapter-specific access/terms review
 
 ## Phase 4 — Matching
