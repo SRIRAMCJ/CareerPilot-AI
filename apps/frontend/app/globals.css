@@ -131,3 +131,10 @@ button { cursor: pointer; }
 
 .interview-time { margin: 13px 0 8px; color: #405c73; font-size: 11px; font-weight: 700; }
 .interview-time span { margin-left: 6px; color: #8b99a6; font-size: 9px; font-weight: 400; }
+
+.application-details { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 13px; padding-top: 12px; border-top: 1px solid #edf0f3; }
+.application-details label { display: grid; gap: 6px; color: #748392; font-size: 9px; }
+.application-details label:nth-child(3) { grid-column: 1 / -1; }
+.application-details input, .application-details textarea { width: 100%; border: 1px solid #e1e7ec; border-radius: 6px; padding: 8px; color: #40566b; font-size: 10px; background: white; }
+.application-details button { justify-self: start; }
+@media (max-width: 600px) { .application-details { grid-template-columns: 1fr; }.application-details label:nth-child(3) { grid-column: auto; } }
