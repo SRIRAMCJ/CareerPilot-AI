@@ -1,15 +1,15 @@
 import json
-import os
 import sqlite3
 from pathlib import Path
 from typing import Any
 
+from app.core.config import get_settings
 from app.schemas.profile import CandidateProfile
 
 
 def database_path() -> Path:
     """Resolve the private local database path; callers may override it in tests."""
-    configured = os.getenv("CAREERPILOT_DATABASE_PATH")
+    configured = get_settings().careerpilot_database_path
     path = Path(configured) if configured else Path.cwd() / "data" / "careerpilot.db"
     path.parent.mkdir(parents=True, exist_ok=True)
     return path
