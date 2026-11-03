@@ -89,7 +89,16 @@ export default function Home() {
       const response = await fetch(`${API}/api/v1/applications`);
       if (!response.ok) throw new Error("Could not load applications");
       const data = await response.json();
-      setApplications(data.items || []);
+      const items: Application[] = data.items || [];
+      setApplications(items);
+      const savedMaterials = await Promise.all(items.map(async item => {
+        const result = await fetch(`${API}/api/v1/applications/${item.id}/materials`);
+        if (!result.ok) return null;
+        const materialData = await result.json();
+        const latest = materialData.items?.[0];
+        return latest ? [item.id, `/api/v1/materials/${latest.id}/download`] as const : null;
+      }));
+      setMaterialLinks(Object.fromEntries(savedMaterials.filter(Boolean) as [number, string][]));
       setApiOnline(true);
     } catch { setApiOnline(false); }
   }, []);
