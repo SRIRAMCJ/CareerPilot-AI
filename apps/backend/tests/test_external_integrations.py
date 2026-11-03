@@ -1,4 +1,8 @@
+import base64
+from email import message_from_bytes
+
 from app.routers.browser_automation import _field_value, _safe_job_url
+from app.routers.gmail import EmailDraft, _raw_message
 from app.routers.integrations import job_board_search_links
 
 
@@ -34,3 +38,17 @@ def test_browser_rejects_non_https_and_private_destinations():
 
 def test_browser_accepts_public_https_job_url():
     assert _safe_job_url("https://jobs.example.com/apply/123") == "https://jobs.example.com/apply/123"
+
+
+def test_gmail_reply_message_preserves_thread_headers():
+    item = EmailDraft(
+        to=["recruiter@example.com"], subject="Re: AI Engineer role", body="Thank you.",
+        thread_id="thread-123", in_reply_to="<original@example.com>",
+        references="<earlier@example.com> <original@example.com>",
+    )
+    raw = base64.urlsafe_b64decode(_raw_message(item))
+    message = message_from_bytes(raw)
+    assert message["To"] == "recruiter@example.com"
+    assert message["Subject"] == "Re: AI Engineer role"
+    assert message["In-Reply-To"] == "<original@example.com>"
+    assert message["References"] == "<earlier@example.com> <original@example.com>"
