@@ -8,7 +8,7 @@ type Profile = {
   full_name: string; email: string; phone: string; location: string; headline: string;
   professional_summary: string; current_role: string; target_roles: string[];
   preferred_locations: string[]; preferred_work_modes: string[]; minimum_salary: number | null;
-  skills: string[]; tools_and_technologies: string[]; preferred_job_types: string[];
+  skills: string[]; tools_and_technologies: string[]; preferred_job_types: string[]; education: string[]; experience: string[]; projects: string[]; certifications: string[]; years_experience: number | null; notice_period: string;
 };
 type Job = {
   id: number; title: string; company: string; location?: string | null; work_mode?: string | null;
@@ -22,7 +22,7 @@ type Interview = { id: number; application_id: number; title: string; event_type
 const emptyProfile: Profile = {
   full_name: "", email: "", phone: "", location: "", headline: "", professional_summary: "",
   current_role: "", target_roles: [], preferred_locations: [], preferred_work_modes: [],
-  minimum_salary: null, skills: [], tools_and_technologies: [], preferred_job_types: [],
+  minimum_salary: null, skills: [], tools_and_technologies: [], preferred_job_types: [], education: [], experience: [], projects: [], certifications: [], years_experience: null, notice_period: "",
 };
 
 function splitList(value: string): string[] {
@@ -59,7 +59,7 @@ export default function Home() {
         setProfile({ ...emptyProfile, ...p,
           target_roles: p.target_roles || [], preferred_locations: p.preferred_locations || [],
           preferred_work_modes: p.preferred_work_modes || [], skills: p.skills || [],
-          tools_and_technologies: p.tools_and_technologies || [], preferred_job_types: p.preferred_job_types || [] });
+          tools_and_technologies: p.tools_and_technologies || [], preferred_job_types: p.preferred_job_types || [], education: p.education || [], experience: p.experience || [], projects: p.projects || [], certifications: p.certifications || [] });
         setProfileExists(true);
       }
       setApiOnline(true);
@@ -107,7 +107,7 @@ export default function Home() {
 
   async function saveProfile(event: FormEvent<HTMLFormElement>) {
     event.preventDefault(); setMessage("");
-    const payload = { ...profile, years_experience: null, salary_currency: "INR",
+    const payload = { ...profile, salary_currency: "INR",
       target_roles: profile.target_roles, preferred_locations: profile.preferred_locations,
       preferred_work_modes: profile.preferred_work_modes, skills: profile.skills,
       tools_and_technologies: profile.tools_and_technologies, preferred_job_types: profile.preferred_job_types };
@@ -250,6 +250,8 @@ export default function Home() {
   ];
   const updateList = (key: "target_roles" | "preferred_locations" | "preferred_work_modes" | "skills" | "tools_and_technologies" | "preferred_job_types", value: string) =>
     setProfile((current) => ({ ...current, [key]: splitList(value) }));
+  const updateParagraphList = (key: "education" | "experience" | "projects" | "certifications", value: string) =>
+    setProfile(current => ({ ...current, [key]: value.split("\\n").map(line => line.trim()).filter(Boolean) }));
 
   return (
     <main className="shell">
@@ -304,6 +306,11 @@ export default function Home() {
             <label>Skills<input value={profile.skills.join(", ")} onChange={e => updateList("skills",e.target.value)} placeholder="Python, LLMs, RAG, FastAPI" /></label>
             <label>Tools and technologies<input value={profile.tools_and_technologies.join(", ")} onChange={e => updateList("tools_and_technologies",e.target.value)} placeholder="Next.js, PostgreSQL, Ollama" /></label>
             <label>Preferred job types<input value={profile.preferred_job_types.join(", ")} onChange={e => updateList("preferred_job_types",e.target.value)} placeholder="Full-time, Contract" /></label>
+            <div className="form-two"><label>Years of experience<input type="number" min="0" max="60" step="0.5" value={profile.years_experience ?? ""} onChange={e => setProfile({...profile,years_experience:e.target.value ? Number(e.target.value) : null})} /></label><label>Notice period<input value={profile.notice_period} onChange={e => setProfile({...profile,notice_period:e.target.value})} placeholder="Immediate, 30 days" /></label></div>
+            <label>Education <small>One entry per line</small><textarea rows={3} value={profile.education.join("\\n")} onChange={e => updateParagraphList("education",e.target.value)} placeholder="B.Tech in Artificial Intelligence and Data Science" /></label>
+            <label>Professional experience <small>One verified role or achievement per line</small><textarea rows={4} value={profile.experience.join("\\n")} onChange={e => updateParagraphList("experience",e.target.value)} placeholder="AI Engineer — Company — dates and responsibilities" /></label>
+            <label>Projects <small>One project per line</small><textarea rows={4} value={profile.projects.join("\\n")} onChange={e => updateParagraphList("projects",e.target.value)} placeholder="Project name — technologies — verified outcome" /></label>
+            <label>Certifications <small>One certification per line</small><textarea rows={3} value={profile.certifications.join("\\n")} onChange={e => updateParagraphList("certifications",e.target.value)} placeholder="Certification name — issuer — year" /></label>
             <button className="submit-button" type="submit">Save profile locally</button>
           </form>}
           <div className="resume-panel">
