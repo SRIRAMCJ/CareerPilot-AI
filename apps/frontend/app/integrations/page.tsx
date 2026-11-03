@@ -123,7 +123,7 @@ export default function IntegrationsPage() {
     finally { setBusy(false); }
   }
 
-  useEffect(() => { void refreshGmail(); }, []);
+  useEffect(() => {\n    fetch(`${API}/api/v1/gmail/status`).then(response => response.json()).then(data => setGmail(data)).catch(() => undefined);\n  }, []);
 
   return (
     <main style={{ maxWidth: 1040, margin: "40px auto", padding: "0 22px 60px", color: "#e8edf5", fontFamily: "Arial, sans-serif" }}>
