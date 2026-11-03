@@ -20,6 +20,9 @@ def test_application_tracker_lifecycle(tmp_path, monkeypatch):
     duplicate = client.post("/api/v1/applications", json={"job_id": job["id"]})
     assert duplicate.status_code == 409
 
+    for next_status in ("preparing", "ready_to_submit", "applied"):
+        step = client.patch(f"/api/v1/applications/{application_id}", json={"status": next_status})
+        assert step.status_code == 200
     updated = client.patch(f"/api/v1/applications/{application_id}", json={
         "status": "interview", "next_action": "Prepare technical round"
     })
