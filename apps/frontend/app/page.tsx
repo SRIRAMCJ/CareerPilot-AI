@@ -42,6 +42,8 @@ export default function Home() {
   const [interviews, setInterviews] = useState<Interview[]>([]);
   const [interviewDraft, setInterviewDraft] = useState({ application_id: "", title: "", event_type: "interview", starts_at: "", ends_at: "", meeting_url: "", notes: "", reminder_minutes: 30 });
   const [materialLinks, setMaterialLinks] = useState<Record<number, string>>({});
+  const [aiDrafts, setAiDrafts] = useState<Record<number, string>>({});
+  const [aiBusy, setAiBusy] = useState<number | null>(null);
   const [resumes, setResumes] = useState<ResumeItem[]>([]);
   const [resumeResult, setResumeResult] = useState<ResumeResult | null>(null);
   const [resumeBusy, setResumeBusy] = useState(false);
@@ -226,6 +228,18 @@ export default function Home() {
     } catch (error) { setMessage(error instanceof Error ? error.message : "Material generation failed."); }
   }
 
+  async function generateAiCoverLetter(id: number) {
+    setAiBusy(id);
+    try {
+      const response = await fetch(`${API}/api/v1/applications/${id}/cover-letter/ai`, { method: "POST" });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.detail || "Local AI cover-letter generation failed");
+      setAiDrafts(current => ({ ...current, [id]: data.draft }));
+      setMessage(`Draft generated using local Ollama model ${data.model}. Review all claims before use.`);
+    } catch (error) { setMessage(error instanceof Error ? error.message : "AI draft failed."); }
+    finally { setAiBusy(null); }
+  }
+
   async function updateApplicationDetails(id: number, patch: Partial<Pick<Application, "notes" | "next_action" | "follow_up_date">>) {
     try {
       const response = await fetch(`${API}/api/v1/applications/${id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(patch) });
@@ -369,7 +383,7 @@ export default function Home() {
         {section === "applications" && <section className="panel"><div className="panel-heading"><div><span className="eyebrow">APPLICATION TRACKER</span><h3>Your tracked opportunities <span className="count">{applications.length}</span></h3></div><button className="small-button" onClick={() => void loadApplications()}>Refresh</button></div>
           {applications.length === 0 ? <div className="empty-state"><strong>No tracked opportunities yet</strong><p>Open Job discovery and select “Track job” on an opportunity you want to follow.</p></div> :
             <div className="job-list">{applications.map(item => <article className="job-card" key={item.id}><div className="job-card-top"><div><strong>{item.job_title}</strong><p>{item.company}</p></div><span className="job-source">#{item.id}</span></div>
-              {item.job_url && <p className="application-link"><a href={item.job_url} target="_blank" rel="noreferrer">Open original job application page ↗</a></p>}<div className="application-controls"><label>Status<select value={item.status} onChange={event => void updateApplicationStatus(item.id,event.target.value)}>{["saved","shortlisted","preparing","ready_to_submit","applied","assessment","interview","offer","rejected","withdrawn"].map(status => <option key={status} value={status}>{status.replace("_"," ")}</option>)}</select></label><button className="small-button" onClick={() => void generateMaterials(item.id)}>Generate application pack</button>{materialLinks[item.id] && <a href={`${API}${materialLinks[item.id]}`} target="_blank" rel="noreferrer">Download DOCX ↗</a>}<span className="application-note">Draft uses saved profile facts. Review before sending; no application is submitted.</span></div>
+              {item.job_url && <p className="application-link"><a href={item.job_url} target="_blank" rel="noreferrer">Open original job application page ↗</a></p>}<div className="application-controls"><label>Status<select value={item.status} onChange={event => void updateApplicationStatus(item.id,event.target.value)}>{["saved","shortlisted","preparing","ready_to_submit","applied","assessment","interview","offer","rejected","withdrawn"].map(status => <option key={status} value={status}>{status.replace("_"," ")}</option>)}</select></label><button className="small-button" onClick={() => void generateMaterials(item.id)}>Generate application pack</button><button className="small-button" disabled={aiBusy === item.id} onClick={() => void generateAiCoverLetter(item.id)}>{aiBusy === item.id ? "Generating…" : "Local AI cover letter"}</button>{materialLinks[item.id] && <a href={`${API}${materialLinks[item.id]}`} target="_blank" rel="noreferrer">Download DOCX ↗</a>}<span className="application-note">AI drafting requires AI_PROVIDER=ollama and a local OLLAMA_MODEL. Review all claims; no application is submitted.</span></div>{aiDrafts[item.id] && <div className="ai-draft"><strong>Local AI cover-letter draft · review before use</strong><textarea rows={10} readOnly value={aiDrafts[item.id]} /></div>}
               <div className="application-details"><label>Next action<input value={item.next_action || ""} placeholder="e.g. Follow up with recruiter" onChange={event => setApplications(current => current.map(row => row.id === item.id ? {...row,next_action:event.target.value} : row))} /></label><label>Follow-up date<input type="date" value={item.follow_up_date || ""} onChange={event => setApplications(current => current.map(row => row.id === item.id ? {...row,follow_up_date:event.target.value} : row))} /></label><label>Notes<textarea rows={2} value={item.notes || ""} onChange={event => setApplications(current => current.map(row => row.id === item.id ? {...row,notes:event.target.value} : row))} /></label><button className="small-button" onClick={() => void updateApplicationDetails(item.id,{next_action:item.next_action || "",follow_up_date:item.follow_up_date || null,notes:item.notes || ""})}>Save notes and follow-up</button></div>
             </article>)}</div>}
         </section>}
