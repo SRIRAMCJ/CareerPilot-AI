@@ -60,7 +60,6 @@ def update_application(application_id: int, item: ApplicationUpdate) -> dict[str
     changes = item.model_dump(exclude_unset=True, mode="json")
     if not changes:
         return get_application(application_id)
-    allowed = {"status", "notes", "applied_date", "next_action", "follow_up_date"}
     assignments = ", ".join(f"{key} = ?" for key in changes)
     values = [*changes.values(), application_id]
     with _connect() as connection:
