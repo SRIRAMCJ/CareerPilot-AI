@@ -1,5 +1,7 @@
 import sqlite3
+from datetime import datetime
 from typing import Any
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from app.core import database
 from app.schemas.interview import InterviewCreate, InterviewUpdate
@@ -64,6 +66,20 @@ def update_interview(event_id: int, item: InterviewUpdate) -> dict[str, Any] | N
     changes = item.model_dump(exclude_unset=True, mode="json")
     if not changes:
         return get_interview(event_id)
+    current = get_interview(event_id)
+    if current is None:
+        return None
+    merged = {**current, **changes}
+    starts = datetime.fromisoformat(merged["starts_at"])
+    ends = datetime.fromisoformat(merged["ends_at"])
+    if starts.tzinfo is None or starts.utcoffset() is None or ends.tzinfo is None or ends.utcoffset() is None:
+        raise ValueError("Interview dates must include timezone offsets.")
+    if ends <= starts:
+        raise ValueError("ends_at must be after starts_at.")
+    try:
+        ZoneInfo(merged["timezone_name"])
+    except ZoneInfoNotFoundError as error:
+        raise ValueError("Use a valid IANA timezone.") from error
     if "meeting_url" in changes and changes["meeting_url"] is not None:
         changes["meeting_url"] = str(changes["meeting_url"])
     assignments = ", ".join(f"{key} = ?" for key in changes)
