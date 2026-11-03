@@ -36,7 +36,7 @@ def create_application(item: ApplicationCreate) -> dict[str, Any]:
              payload["next_action"], payload["follow_up_date"]),
         )
         row = connection.execute(
-            """SELECT a.*, j.title AS job_title, j.company AS company
+            """SELECT a.*, j.title AS job_title, j.company AS company, j.url AS job_url
             FROM applications a JOIN job_listings j ON j.id = a.job_id WHERE a.id = ?""",
             (cursor.lastrowid,),
         ).fetchone()
