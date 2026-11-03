@@ -1,8 +1,6 @@
 import base64
-import re
 from email.mime.text import MIMEText
 from pathlib import Path
-from typing import Literal
 
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
