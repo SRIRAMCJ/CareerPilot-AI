@@ -62,12 +62,15 @@ The backend CORS origin defaults to `http://localhost:3000`.
 
 ## Current features
 
-- Candidate profile CRUD in local SQLite.
-- Manual job capture and job listing search.
-- Public Greenhouse and Lever company-board discovery. See [JOB_SOURCES.md](JOB_SOURCES.md).
-- Deterministic match scoring with skill overlap and preference reasons.
-- Application tracking and status updates.
-- External account automation and application submission remain disabled.
+- Candidate profile CRUD in local SQLite, including skills, experience, education, projects, and preferences.
+- PDF/DOCX resume import, text extraction, skill/contact hints, preview, and local deletion.
+- Public Greenhouse, Lever, Ashby, and Workable company-board discovery.
+- Persistent company-board watchlist and one-click multi-board scan.
+- Manual job capture, local search, duplicate detection, and explainable match scoring with eligibility blockers.
+- Application tracker with status, notes, next actions, and follow-up dates.
+- Per-application DOCX resume and cover-letter draft generation from saved profile facts.
+- Interview and assessment scheduling with timezone-aware ICS export and reminder alarms.
+- Automated application submission, Gmail, and direct Google Calendar OAuth remain disabled/unimplemented.
 
 ## Optional daily job scan
 
