@@ -48,3 +48,14 @@ Never commit resumes, personal contact details, browser profiles, OAuth tokens, 
 ## Integration status
 
 Every integration must be labeled **implemented**, **partial**, or **unavailable**. Do not represent mock integrations as live.
+
+
+## Public job discovery
+
+CareerPilot supports manual job capture plus public Greenhouse and Lever company-board discovery. See [docs/JOB_SOURCES.md](docs/JOB_SOURCES.md) for setup and limitations.
+
+The discovery endpoint fetches public postings, normalizes the listing, saves it to local SQLite, and skips duplicate source IDs. It does not scrape authenticated job-board pages or submit applications.
+
+### Local development
+
+Install backend dependencies from `apps/backend` with `pip install -e ".[dev]"`. Start the API with `uvicorn app.main:app --reload --host 127.0.0.1 --port 8000`. Start the frontend from `apps/frontend` with `npm install` and `npm run dev`.
