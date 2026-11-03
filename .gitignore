@@ -1,0 +1,50 @@
+# Secrets and local environment
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets/
+credentials/
+token.json
+credentials.json
+
+# Candidate personal data and generated documents
+data/
+resumes/
+generated_resumes/
+application_evidence/
+browser_profiles/
+playwright/.auth/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Node
+node_modules/
+.next/
+out/
+dist/
+*.tsbuildinfo
+
+# Local databases and logs
+*.db
+*.sqlite*
+*.log
+logs/
+*.dump
+*.backup
+
+# Editors / operating systems
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
