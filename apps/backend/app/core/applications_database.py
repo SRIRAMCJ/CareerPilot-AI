@@ -36,7 +36,7 @@ def create_application(item: ApplicationCreate) -> dict[str, Any]:
              payload["next_action"], payload["follow_up_date"]),
         )
         row = connection.execute(
-            """SELECT a.*, j.title AS job_title, j.company AS company, j.url AS job_url
+            """SELECT a.*, j.title AS job_title, j.company AS company, j.url AS job_url, j.url AS job_url
             FROM applications a JOIN job_listings j ON j.id = a.job_id WHERE a.id = ?""",
             (cursor.lastrowid,),
         ).fetchone()
@@ -44,7 +44,7 @@ def create_application(item: ApplicationCreate) -> dict[str, Any]:
 
 
 def list_applications(status_filter: str | None = None) -> list[dict[str, Any]]:
-    query = """SELECT a.*, j.title AS job_title, j.company AS company
+    query = """SELECT a.*, j.title AS job_title, j.company AS company, j.url AS job_url
                FROM applications a JOIN job_listings j ON j.id = a.job_id"""
     values: tuple[Any, ...] = ()
     if status_filter:
@@ -70,7 +70,7 @@ def update_application(application_id: int, item: ApplicationUpdate) -> dict[str
         if cursor.rowcount == 0:
             return None
         row = connection.execute(
-            """SELECT a.*, j.title AS job_title, j.company AS company
+            """SELECT a.*, j.title AS job_title, j.company AS company, j.url AS job_url
             FROM applications a JOIN job_listings j ON j.id = a.job_id WHERE a.id = ?""",
             (application_id,),
         ).fetchone()
@@ -80,7 +80,7 @@ def update_application(application_id: int, item: ApplicationUpdate) -> dict[str
 def get_application(application_id: int) -> dict[str, Any] | None:
     with _connect() as connection:
         row = connection.execute(
-            """SELECT a.*, j.title AS job_title, j.company AS company
+            """SELECT a.*, j.title AS job_title, j.company AS company, j.url AS job_url
             FROM applications a JOIN job_listings j ON j.id = a.job_id WHERE a.id = ?""",
             (application_id,),
         ).fetchone()
