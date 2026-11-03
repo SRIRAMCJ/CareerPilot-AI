@@ -25,7 +25,10 @@ def get_interviews() -> dict:
 
 @router.patch("/{event_id}")
 def patch_interview(event_id: int, item: InterviewUpdate) -> dict:
-    updated = update_interview(event_id, item)
+    try:
+        updated = update_interview(event_id, item)
+    except ValueError as error:
+        raise HTTPException(status_code=422, detail=str(error)) from error
     if updated is None:
         raise HTTPException(status_code=404, detail="Interview event not found.")
     return updated
