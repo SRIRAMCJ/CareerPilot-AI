@@ -18,6 +18,17 @@ Copy-Item .env.example .env
 
 Keep real candidate data, resumes, API keys, and browser profiles outside the repository. The local SQLite database is written under `apps/backend/data` when the backend is started from `apps/backend`; this directory is ignored by Git. You can override it with `CAREERPILOT_DATABASE_PATH`.
 
+## One-command Windows setup
+
+From the repository root, run:
+
+```powershell
+.\scripts\setup-local.ps1
+.\scripts\start-local.ps1
+```
+
+The setup script creates the backend virtual environment, installs Python and npm dependencies, and copies `.env.example` to the root `.env` if it does not already exist. The launcher opens separate backend/frontend PowerShell windows and opens the dashboard. Stop each service by closing its terminal window or pressing Ctrl+C there.
+
 ## Start the backend
 
 ```powershell
