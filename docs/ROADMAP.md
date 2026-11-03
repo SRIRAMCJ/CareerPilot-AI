@@ -5,56 +5,61 @@
 - [x] FastAPI backend skeleton
 - [x] Next.js frontend skeleton
 - [x] Configuration and health endpoint
-- [x] Automated backend/frontend CI (workflow configured; latest feature-run verification pending)
+- [x] Automated backend/frontend CI workflows (latest full run still requires verification)
 - [x] Local setup documentation
 
 ## Phase 2 — Candidate profile
 - [x] Profile schema and CRUD API
-- [x] Initial role, location, work-mode, and salary preferences
-- [x] PDF/DOCX resume upload, parsing, local storage, and deletion
-- [ ] Verified-fact provenance
+- [x] Role, location, work-mode, salary, experience, education, project, and certification fields
+- [x] PDF/DOCX resume upload, parsing, local storage, preview, and deletion
+- [ ] Verified-fact provenance and source-to-profile evidence mapping
 
 ## Phase 3 — Job discovery
-- [x] Initial public-source adapter boundary
+- [x] Public-source adapter boundary
 - [x] Greenhouse, Lever, Ashby, and Workable public board connectors
-- [x] Initial listing normalization
+- [x] Job listing normalization and keyword extraction
 - [x] Source ID duplicate detection
-- [ ] Source access and terms review per adapter
+- [x] Manual job capture and local title/company/location search
+- [ ] Broader employer-board catalog and adapter-specific access/terms review
 
 ## Phase 4 — Matching
-- [ ] Hard eligibility checks
-- [x] Initial explainable weighted scoring
-- [ ] Search and filters
-- [x] Match reason display
+- [x] Explainable weighted scoring
+- [x] Role, location, work-mode, and salary eligibility blockers
+- [x] Match reasons, matched skills, and missing-skill explanations
+- [ ] Experience-level and seniority eligibility rules
+- [ ] Advanced search filters and ranking controls
 
 ## Phase 5 — Application preparation
-- [x] Per-application DOCX resume and cover-letter draft generation (profile-fact grounded; user review required)
-- [x] Deterministic DOCX resume and cover-letter draft generation from verified profile facts
-- [x] Generation restricted to saved candidate facts; user review required
+- [x] Per-application DOCX resume and cover-letter draft generation from saved profile facts
+- [x] Factuality guardrails: no invented employers, dates, qualifications, metrics, or achievements
+- [x] Candidate review before using generated materials
+- [ ] Resume tailoring based on full parsed source-resume sections
 - [ ] Application answer evidence mapping
 
 ## Phase 6 — Application workflow
-- [ ] Explicit workflow state machine
+- [x] Application tracker with status, notes, next action, and follow-up date
+- [x] Original job-page links and a ready-to-submit review status
+- [ ] Formal workflow state machine and audit trail
 - [ ] Authorized Playwright session support
-- [ ] Per-platform permitted adapters
+- [ ] Per-platform permitted application adapters
 - [ ] Submission idempotency and confirmation evidence
 - [ ] Review gates for sensitive declarations
 
 ## Phase 7 — Communication and scheduling
-- [ ] Gmail OAuth with least privilege
-- [ ] Recruiter email classification
-- [ ] Draft replies
-- [x] Local interview/assessment scheduler with timezone-aware ICS export
-- [x] Local interview and assessment scheduler with timezone-aware ICS export
+- [x] Local interview and assessment scheduler
+- [x] Timezone-aware events and ICS calendar export with reminder alarms
+- [ ] Calendar conflict detection
 - [ ] Google Calendar OAuth
-- [ ] Timezone-aware scheduling and conflict detection
+- [ ] Gmail OAuth with least privilege
+- [ ] Recruiter email classification and reply drafts
 
 ## Phase 8 — Analytics and hardening
 - [ ] Application funnel metrics
 - [ ] Audit exports
-- [ ] Backup and restore
+- [ ] Encrypted backup and restore
 - [ ] Security and recovery tests
+- [ ] Full end-to-end local runtime verification
 
 ## Release gates
 
-Do not enable real application submission until profile verification, deduplication, safety gates, audit logging, and submission confirmation tests pass. Real external integration tests must use explicitly authorized accounts and must not submit applications without the user's configured permission.
+Real application submission must remain disabled until profile verification, deduplication, safety gates, audit logging, platform-permitted access, and submission confirmation tests pass. Never automate CAPTCHA bypass, legal declarations, fees, or identity-bound assessments/interviews. Real external integration tests must use explicitly authorized accounts and must not submit applications without the user's configured permission.
