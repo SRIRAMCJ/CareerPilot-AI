@@ -1,6 +1,6 @@
 # Public Job Source Connectors
 
-CareerPilot currently supports public company job boards from Greenhouse, Lever, and Ashby.
+CareerPilot currently supports public company job boards from Greenhouse, Lever, Ashby, and Workable.
 
 ## Greenhouse
 
@@ -22,6 +22,17 @@ The backend requests the documented public posting endpoint:
 `https://api.ashbyhq.com/posting-api/job-board/{slug}?includeCompensation=true`
 
 Only listed postings are imported. The adapter normalizes workplace type, location, employment type, job URL, and publication date when present. Compensation is not yet parsed into numeric salary fields.
+
+## Workable
+
+1. Open the company's public Workable career page, usually under `apply.workable.com/{slug}`.
+2. Copy the account slug from the URL.
+3. Select **Workable** in CareerPilot and enter that slug.
+
+CareerPilot requests Workable's documented public jobs endpoint at:
+`https://www.workable.com/api/accounts/{slug}?details=true`
+
+This public endpoint returns published jobs. The adapter normalizes company name, title, location, workplace type, employment type, date, description, and application URL when present. Workable's authenticated SPI API is not used and no API token is required for this public feed.
 
 ## Lever
 
