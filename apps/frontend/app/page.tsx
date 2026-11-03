@@ -96,9 +96,9 @@ export default function Home() {
         if (!result.ok) return null;
         const materialData = await result.json();
         const latest = materialData.items?.[0];
-        return latest ? [item.id, `/api/v1/materials/${latest.id}/download`] as const : null;
+        return latest ? [item.id, `/api/v1/materials/${latest.id}/download`] as [number, string] : null;
       }));
-      setMaterialLinks(Object.fromEntries(savedMaterials.filter(Boolean) as [number, string][]));
+      setMaterialLinks(Object.fromEntries(savedMaterials.filter((item): item is [number, string] => item !== null)));
       setApiOnline(true);
     } catch { setApiOnline(false); }
   }, []);
