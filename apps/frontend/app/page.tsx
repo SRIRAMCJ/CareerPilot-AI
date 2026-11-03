@@ -272,6 +272,40 @@ export default function Home() {
     } catch (error) { setMessage(error instanceof Error ? error.message : "Could not update application."); }
   }
 
+  async function scheduleInterview(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const startsAt = new Date(interviewDraft.starts_at);
+    const endsAt = new Date(interviewDraft.ends_at);
+    if (!Number.isFinite(startsAt.getTime()) || !Number.isFinite(endsAt.getTime()) || endsAt <= startsAt) {
+      setMessage("Choose a valid start and end time. The end must be after the start.");
+      return;
+    }
+    try {
+      const response = await fetch(`${API}/api/v1/interviews`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          application_id: Number(interviewDraft.application_id),
+          title: interviewDraft.title,
+          event_type: interviewDraft.event_type,
+          starts_at: startsAt.toISOString(),
+          ends_at: endsAt.toISOString(),
+          timezone_name: Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Kolkata",
+          meeting_url: interviewDraft.meeting_url || null,
+          notes: interviewDraft.notes,
+          reminder_minutes: Number(interviewDraft.reminder_minutes),
+        }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.detail || "Could not schedule this event");
+      await loadInterviews();
+      setInterviewDraft({ application_id: "", title: "", event_type: "interview", starts_at: "", ends_at: "", meeting_url: "", notes: "", reminder_minutes: 30 });
+      setMessage("Interview or assessment added to your calendar planner.");
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Could not schedule event.");
+    }
+  }
+
   async function trackJob(jobId: number) {
     try {
       const response = await fetch(`${API}/api/v1/applications`, {
