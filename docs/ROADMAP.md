@@ -5,7 +5,7 @@
 - [x] FastAPI backend skeleton
 - [x] Next.js frontend skeleton
 - [x] Configuration and health endpoint
-- [x] Automated backend/frontend CI workflows (latest full run still requires verification)
+- [x] Automated backend/frontend CI workflows (backend matrix, frontend lint and production build passing)
 - [x] Local setup documentation
 
 ## Phase 2 — Candidate profile
@@ -41,10 +41,11 @@
 
 ## Phase 6 — Application workflow
 - [x] Application tracker with status, notes, next action, and follow-up date
+- [x] Basic profile field filling in visible browser and a typed, disabled-by-default submit confirmation
 - [x] Original job-page links and a ready-to-submit review status
 - [x] Local audit event log for profile, discovery, job, application, resume, materials, and interview actions
 - [ ] Formal workflow state machine and audit trail
-- [ ] Authorized Playwright session support
+- [x] Visible local Playwright session support with a dedicated browser profile
 - [ ] Per-platform permitted application adapters
 - [ ] Submission idempotency and confirmation evidence
 - [ ] Review gates for sensitive declarations
@@ -54,8 +55,8 @@
 - [x] Timezone-aware events and ICS calendar export with reminder alarms
 - [ ] Calendar conflict detection
 - [ ] Google Calendar OAuth
-- [ ] Gmail OAuth with least privilege
-- [ ] Recruiter email classification and reply drafts
+- [x] Gmail OAuth with read, compose and send scopes (requires user credentials and consent)
+- [x] Recruiter inbox search, threaded reply drafts, and explicit send action
 
 ## Phase 8 — Analytics and hardening
 - [ ] Application funnel metrics
