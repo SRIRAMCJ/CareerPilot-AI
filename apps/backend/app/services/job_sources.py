@@ -139,6 +139,44 @@ async def fetch_ashby(slug: str, limit: int) -> list[dict[str, Any]]:
     return jobs
 
 
+async def fetch_workable(slug: str, limit: int) -> list[dict[str, Any]]:
+    url = f"https://www.workable.com/api/accounts/{slug}"
+    async with httpx.AsyncClient(timeout=15.0, follow_redirects=True) as client:
+        response = await client.get(url, params={"details": "true"})
+        response.raise_for_status()
+        payload = response.json()
+    company = payload.get("name") or slug.replace("-", " ").title()
+    jobs = []
+    for item in payload.get("jobs", [])[:limit]:
+        city = item.get("city") or ""
+        state = item.get("state") or ""
+        country = item.get("country") or ""
+        location = ", ".join(part for part in (city, state, country) if part)
+        workplace = (item.get("workplace_type") or "").casefold()
+        if not workplace and item.get("telecommuting"):
+            workplace = "remote"
+        work_mode = {
+            "remote": "Remote", "hybrid": "Hybrid", "on_site": "On-site",
+            "onsite": "On-site",
+        }.get(workplace)
+        description = html_to_text(item.get("description"))
+        published = item.get("published_on") or ""
+        jobs.append({
+            "title": item.get("title") or "Untitled role",
+            "company": company,
+            "location": location or None,
+            "work_mode": work_mode or _work_mode(location, description),
+            "job_type": item.get("employment_type"),
+            "source": f"workable:{slug}",
+            "source_job_id": str(item.get("code") or item.get("shortcode") or item.get("url")),
+            "url": item.get("application_url") or item.get("url"),
+            "description": description[:30000],
+            "required_skills": _skills(description),
+            "posted_date": published[:10] if published else None,
+        })
+    return jobs
+
+
 async def discover_jobs(provider: str, slug: str, limit: int) -> list[dict[str, Any]]:
     if provider == "greenhouse":
         return await fetch_greenhouse(slug, limit)
@@ -146,4 +184,6 @@ async def discover_jobs(provider: str, slug: str, limit: int) -> list[dict[str, 
         return await fetch_lever(slug, limit)
     if provider == "ashby":
         return await fetch_ashby(slug, limit)
+    if provider == "workable":
+        return await fetch_workable(slug, limit)
     raise ValueError("Unsupported job source.")
