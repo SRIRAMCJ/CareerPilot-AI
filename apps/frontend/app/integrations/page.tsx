@@ -16,7 +16,10 @@ export default function IntegrationsPage() {
   const [messages, setMessages] = useState<GmailMessage[]>([]);
   const [recipient, setRecipient] = useState("");
   const [subject, setSubject] = useState("");
-  const [body, setBody] = useState("");\n  const [replyThreadId, setReplyThreadId] = useState("");\n  const [replyInReplyTo, setReplyInReplyTo] = useState("");\n  const [replyReferences, setReplyReferences] = useState("");
+  const [body, setBody] = useState("");
+  const [replyThreadId, setReplyThreadId] = useState("");
+  const [replyInReplyTo, setReplyInReplyTo] = useState("");
+  const [replyReferences, setReplyReferences] = useState("");
   const [applicationId, setApplicationId] = useState("");
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
