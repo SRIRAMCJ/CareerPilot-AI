@@ -16,6 +16,7 @@ type Job = {
 };
 type Match = { score: number; decision: string; eligible: boolean; blocking_reasons: string[]; matched_skills: string[]; missing_skills: string[]; reasons: string[] };
 type Application = { id: number; job_id: number; status: string; notes: string; next_action?: string | null; follow_up_date?: string | null; job_title: string; company: string; job_url?: string | null };
+type Board = { id: number; provider: string; company_slug: string; created_at: string };
 type ResumeItem = { id: number; filename: string; file_type: string; file_size: number; uploaded_at: string };
 type ResumeResult = ResumeItem & { extracted_text_length: number; extracted_skills: string[]; extracted_email?: string | null; extracted_phone?: string | null };
 type Interview = { id: number; application_id: number; title: string; event_type: string; starts_at: string; ends_at: string; timezone_name: string; meeting_url?: string | null; notes: string; reminder_minutes: number; job_title: string; company: string };
@@ -35,6 +36,7 @@ export default function Home() {
   const [profileExists, setProfileExists] = useState(false);
   const [profileLoading, setProfileLoading] = useState(true);
   const [jobs, setJobs] = useState<Job[]>([]);
+  const [boards, setBoards] = useState<Board[]>([]);
   const [jobSearch, setJobSearch] = useState("");
   const [applications, setApplications] = useState<Application[]>([]);
   const [interviews, setInterviews] = useState<Interview[]>([]);
@@ -66,6 +68,14 @@ export default function Home() {
       setApiOnline(true);
     } catch { setApiOnline(false); }
     finally { setProfileLoading(false); }
+  }, []);
+
+  const loadBoards = useCallback(async () => {
+    try {
+      const response = await fetch(`${API}/api/v1/discovery/boards`);
+      if (!response.ok) throw new Error("Could not load company watchlist");
+      const data = await response.json(); setBoards(data.items || []);
+    } catch { /* Watchlist is available when the local API is running. */ }
   }, []);
 
   const loadInterviews = useCallback(async () => {
@@ -113,7 +123,7 @@ export default function Home() {
     } catch { setApiOnline(false); }
   }, [jobSearch]);
 
-  useEffect(() => { void loadProfile(); void loadJobs(); void loadApplications(); void loadResumes(); void loadInterviews(); }, [loadProfile, loadJobs, loadApplications, loadResumes, loadInterviews]);
+  useEffect(() => { void loadProfile(); void loadJobs(); void loadApplications(); void loadResumes(); void loadInterviews(); void loadBoards(); }, [loadProfile, loadJobs, loadApplications, loadResumes, loadInterviews, loadBoards]);
 
   async function saveProfile(event: FormEvent<HTMLFormElement>) {
     event.preventDefault(); setMessage("");
@@ -175,43 +185,35 @@ export default function Home() {
   }
 
   async function discoverJobs(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault(); setMessage(""); setDiscovering(true);
+    event.preventDefault(); setMessage("");
     try {
-      const response = await fetch(`${API}/api/v1/discovery/search`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(discoveryDraft) });
+      const response = await fetch(`${API}/api/v1/discovery/boards`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(discoveryDraft) });
       const data = await response.json();
-      if (!response.ok) throw new Error(data.detail || "Job source search failed");
-      setMessage(`Fetched ${data.fetched} listings; saved ${data.saved} new jobs; skipped ${data.duplicates} duplicates.`);
+      if (!response.ok) throw new Error(data.detail || "Could not save company board");
+      setMessage(`${data.provider} board “${data.company_slug}” added to your watchlist.`);
+      await loadBoards();
+    } catch (error) { setMessage(error instanceof Error ? error.message : "Could not add board."); }
+  }
+
+  async function runDiscovery() {
+    setDiscovering(true); setMessage("");
+    try {
+      const response = await fetch(`${API}/api/v1/discovery/run`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ query: discoveryDraft.query || null, limit_per_board: discoveryDraft.limit }) });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.detail || "Watchlist scan failed");
+      setMessage(`Scanned ${data.boards_scanned}/${data.boards_total} boards · fetched ${data.fetched} · saved ${data.saved} new jobs · duplicates ${data.duplicates}.`);
       await loadJobs();
-    } catch (error) { setMessage(error instanceof Error ? error.message : "Discovery failed."); }
+    } catch (error) { setMessage(error instanceof Error ? error.message : "Watchlist scan failed."); }
     finally { setDiscovering(false); }
   }
 
-  async function scheduleInterview(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault(); setMessage("");
+  async function removeBoard(id: number) {
     try {
-      const payload = {
-        ...interviewDraft,
-        meeting_url: interviewDraft.meeting_url || null,
-        application_id: Number(interviewDraft.application_id),
-        starts_at: new Date(interviewDraft.starts_at).toISOString(),
-        ends_at: new Date(interviewDraft.ends_at).toISOString(),
-        timezone_name: Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Kolkata",
-      };
-      const response = await fetch(`${API}/api/v1/interviews`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.detail?.[0]?.msg || data.detail || "Could not schedule event");
-      setInterviewDraft({ application_id: "", title: "", event_type: "interview", starts_at: "", ends_at: "", meeting_url: "", notes: "", reminder_minutes: 30 });
-      setMessage("Interview or assessment added to your local calendar."); await loadInterviews();
-    } catch (error) { setMessage(error instanceof Error ? error.message : "Scheduling failed."); }
-  }
-
-  async function trackJob(jobId: number) {
-    try {
-      const response = await fetch(`${API}/api/v1/applications`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ job_id: jobId, status: "saved" }) });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.detail || "Could not track this job");
-      setMessage("Job added to your application tracker."); await loadApplications();
-    } catch (error) { setMessage(error instanceof Error ? error.message : "Could not track job."); }
+      const response = await fetch(`${API}/api/v1/discovery/boards/${id}`, { method: "DELETE" });
+      if (!response.ok) throw new Error("Could not remove company board");
+      setBoards(current => current.filter(board => board.id !== id));
+      setMessage("Company board removed from your watchlist.");
+    } catch (error) { setMessage(error instanceof Error ? error.message : "Could not remove board."); }
   }
 
   async function generateMaterials(id: number) {
@@ -348,10 +350,12 @@ export default function Home() {
           <form className="profile-form discovery-form" onSubmit={discoverJobs}>
             <label>Job source<select value={discoveryDraft.provider} onChange={e => setDiscoveryDraft({...discoveryDraft,provider:e.target.value})}><option value="greenhouse">Greenhouse</option><option value="lever">Lever</option><option value="ashby">Ashby</option><option value="workable">Workable</option></select></label>
             <label>Company board slug<input required value={discoveryDraft.company_slug} onChange={e => setDiscoveryDraft({...discoveryDraft,company_slug:e.target.value})} placeholder="e.g. openai" /></label>
-            <label>Keyword filter (optional)<input value={discoveryDraft.query} onChange={e => setDiscoveryDraft({...discoveryDraft,query:e.target.value})} placeholder="AI Engineer, Python" /></label>
-            <button className="submit-button" type="submit" disabled={discovering}>{discovering ? "Searching public board…" : "Search and save jobs"}</button>
+            <button className="submit-button" type="submit">Add company board</button>
           </form>
-          <div className="source-disclaimer">Only public board endpoints are queried. LinkedIn, Naukri and Indeed integrations are not enabled; no login, scraping, or anti-bot bypass is used.</div>
+          <div className="watchlist-heading"><strong>Company watchlist · {boards.length}</strong><button className="small-button" disabled={discovering || boards.length === 0} onClick={() => void runDiscovery()}>{discovering ? "Scanning boards…" : "Scan all boards"}</button></div>
+          <label className="watchlist-filter">Filter scan by keyword (optional)<input value={discoveryDraft.query} onChange={e => setDiscoveryDraft({...discoveryDraft,query:e.target.value})} placeholder="AI Engineer, Python" /></label>
+          <div className="watchlist">{boards.length === 0 ? <p className="application-note">Add company boards above to create your personal job-search watchlist.</p> : boards.map(board => <div className="watchlist-item" key={board.id}><div><strong>{board.company_slug}</strong><small>{board.provider}</small></div><button className="small-button" onClick={() => void removeBoard(board.id)}>Remove</button></div>)}</div>
+          <div className="source-disclaimer">Scans public job feeds from configured company boards. LinkedIn, Naukri, Indeed and Google Jobs are not connected. No login scraping or anti-bot bypass is used.</div>
         </section><section className="panel"><span className="eyebrow">MANUAL JOB CAPTURE</span><h3>Add an opportunity</h3><p className="form-intro">Save a role you found on a job board or company career page.</p>
           <form className="profile-form" onSubmit={addJob}><label>Job title<input required value={jobDraft.title} onChange={e => setJobDraft({...jobDraft,title:e.target.value})} /></label>
             <label>Company<input required value={jobDraft.company} onChange={e => setJobDraft({...jobDraft,company:e.target.value})} /></label>
