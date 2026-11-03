@@ -58,7 +58,11 @@ def score_job(job: dict, profile: CandidateProfile) -> dict:
     minimum = profile.minimum_salary
     salary_min = job.get("salary_min")
     salary_max = job.get("salary_max")
-    if minimum is not None and salary_max is not None and salary_max < minimum:
+    job_currency = str(job.get("salary_currency") or "INR").upper()
+    profile_currency = profile.salary_currency.upper()
+    if minimum is not None and job_currency != profile_currency:
+        reasons.append("Salary comparison skipped because currencies differ")
+    elif minimum is not None and salary_max is not None and salary_max < minimum:
         score = max(0, score - 20)
         reasons.append("Published salary ceiling is below the candidate's minimum")
         blocking_reasons.append("Published salary ceiling is below configured minimum")
