@@ -1,6 +1,7 @@
 import httpx
 from fastapi import APIRouter, HTTPException
 
+from app.core.audit_database import record_event
 from app.core.boards_database import add_board, delete_board, list_boards
 from app.core.jobs_database import create_job
 from app.schemas.board import BoardCreate, DiscoveryRunRequest
@@ -55,7 +56,9 @@ async def search_public_jobs(request: DiscoveryRequest) -> dict:
 
 @router.post("/boards", status_code=201)
 def save_company_board(request: BoardCreate) -> dict:
-    return add_board(request.provider, request.normalized_slug())
+    board = add_board(request.provider, request.normalized_slug())
+    record_event("discovery.board_saved", "job_source_board", board["id"], {"provider": board["provider"], "company_slug": board["company_slug"]})
+    return board
 
 
 @router.get("/boards")
@@ -67,6 +70,7 @@ def get_company_boards() -> dict:
 def remove_company_board(board_id: int) -> dict:
     if not delete_board(board_id):
         raise HTTPException(status_code=404, detail="Company board not found.")
+    record_event("discovery.board_removed", "job_source_board", board_id)
     return {"status": "deleted", "id": board_id}
 
 
@@ -116,9 +120,11 @@ async def run_watchlist(request: DiscoveryRunRequest) -> dict:
             results.append({
                 **board, "status": "error", "error": "Public job source returned an invalid response.",
             })
-    return {
+    summary = {
         "boards_scanned": sum(1 for item in results if item["status"] == "ok"),
         "boards_total": len(boards),
         **totals,
         "results": results,
     }
+    record_event("discovery.watchlist_scanned", "job_source_board", None, {key: summary[key] for key in ("boards_scanned", "boards_total", "fetched", "saved", "duplicates")})
+    return summary
