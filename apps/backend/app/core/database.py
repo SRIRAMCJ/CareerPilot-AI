@@ -92,6 +92,24 @@ def initialize_database(path: Path | None = None) -> None:
             )
             """
         )
+        connection.execute(
+            """
+            CREATE TABLE IF NOT EXISTS interview_events (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                application_id INTEGER NOT NULL REFERENCES applications(id),
+                title TEXT NOT NULL,
+                event_type TEXT NOT NULL DEFAULT 'interview',
+                starts_at TEXT NOT NULL,
+                ends_at TEXT NOT NULL,
+                timezone_name TEXT NOT NULL DEFAULT 'Asia/Kolkata',
+                meeting_url TEXT,
+                notes TEXT NOT NULL DEFAULT '',
+                reminder_minutes INTEGER NOT NULL DEFAULT 30,
+                created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+            )
+            """
+        )
 
 
 def save_profile(profile: CandidateProfile, path: Path | None = None) -> dict[str, Any]:
