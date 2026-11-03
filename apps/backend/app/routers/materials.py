@@ -1,12 +1,16 @@
 from pathlib import Path
 
+import httpx
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import FileResponse
 
 from app.core import database
+from app.core.config import get_settings
 from app.core.applications_database import get_application
 from app.core.materials_database import create_material, get_material, list_materials
+from app.services.ai_provider import generate_cover_letter
 from app.services.materials_generator import generate_application_pack, generated_material_directory
+from app.core.jobs_database import get_job
 
 router = APIRouter(prefix="/api/v1", tags=["application materials"])
 
@@ -48,3 +52,34 @@ def download_material(material_id: int) -> FileResponse:
         filename=material["filename"],
         media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     )
+
+
+@router.post("/applications/{application_id}/cover-letter/ai")
+async def generate_ai_cover_letter(application_id: int) -> dict:
+    application = get_application(application_id)
+    if application is None:
+        raise HTTPException(status_code=404, detail="Application tracker not found.")
+    stored_profile = database.read_profile()
+    if stored_profile is None:
+        raise HTTPException(status_code=409, detail="Create and verify your candidate profile first.")
+    settings = get_settings()
+    if settings.ai_provider.casefold() != "ollama":
+        raise HTTPException(status_code=409, detail="Set AI_PROVIDER=ollama to enable local AI drafting.")
+    job = get_job(application["job_id"])
+    if job is None:
+        raise HTTPException(status_code=404, detail="Job listing not found.")
+    try:
+        draft = await generate_cover_letter(
+            stored_profile["profile"], job, settings.ollama_base_url, settings.ollama_model
+        )
+    except ValueError as error:
+        raise HTTPException(status_code=422, detail=str(error)) from error
+    except httpx.HTTPError as error:
+        raise HTTPException(status_code=502, detail="The local Ollama model could not be reached.") from error
+    return {
+        "application_id": application_id,
+        "draft": draft,
+        "warning": "AI-generated draft. Verify every claim against your actual experience before using it.",
+        "provider": "ollama",
+        "model": settings.ollama_model,
+    }
