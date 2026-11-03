@@ -31,6 +31,8 @@ class JobMatch(BaseModel):
     job_id: int
     score: int
     decision: str
+    eligible: bool
+    blocking_reasons: list[str]
     matched_skills: list[str]
     missing_skills: list[str]
     reasons: list[str]
