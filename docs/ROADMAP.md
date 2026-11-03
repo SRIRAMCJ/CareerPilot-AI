@@ -42,6 +42,7 @@
 ## Phase 6 — Application workflow
 - [x] Application tracker with status, notes, next action, and follow-up date
 - [x] Original job-page links and a ready-to-submit review status
+- [x] Local audit event log for profile, discovery, job, application, resume, materials, and interview actions
 - [ ] Formal workflow state machine and audit trail
 - [ ] Authorized Playwright session support
 - [ ] Per-platform permitted application adapters
