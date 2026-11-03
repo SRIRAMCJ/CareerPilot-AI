@@ -4,7 +4,7 @@ from typing import Literal
 from pydantic import BaseModel, ConfigDict, Field
 
 ApplicationStatus = Literal[
-    "saved", "shortlisted", "preparing", "applied", "assessment",
+    "saved", "shortlisted", "preparing", "ready_to_submit", "applied", "assessment",
     "interview", "offer", "rejected", "withdrawn"
 ]
 
