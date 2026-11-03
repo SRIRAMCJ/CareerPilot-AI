@@ -15,6 +15,7 @@ type Job = {
   source: string; url?: string | null; required_skills: string[]; status: string;
 };
 type Match = { score: number; decision: string; matched_skills: string[]; missing_skills: string[]; reasons: string[] };
+type Application = { id: number; job_id: number; status: string; notes: string; next_action?: string | null; follow_up_date?: string | null; job_title: string; company: string };
 const emptyProfile: Profile = {
   full_name: "", email: "", phone: "", location: "", headline: "", professional_summary: "",
   current_role: "", target_roles: [], preferred_locations: [], preferred_work_modes: [],
@@ -31,6 +32,7 @@ export default function Home() {
   const [profileExists, setProfileExists] = useState(false);
   const [profileLoading, setProfileLoading] = useState(true);
   const [jobs, setJobs] = useState<Job[]>([]);
+  const [applications, setApplications] = useState<Application[]>([]);
   const [matches, setMatches] = useState<Record<number, Match>>({});
   const [message, setMessage] = useState("");
   const [apiOnline, setApiOnline] = useState(false);
@@ -54,6 +56,16 @@ export default function Home() {
     finally { setProfileLoading(false); }
   }, []);
 
+  const loadApplications = useCallback(async () => {
+    try {
+      const response = await fetch(`${API}/api/v1/applications`);
+      if (!response.ok) throw new Error("Could not load applications");
+      const data = await response.json();
+      setApplications(data.items || []);
+      setApiOnline(true);
+    } catch { setApiOnline(false); }
+  }, []);
+
   const loadJobs = useCallback(async () => {
     try {
       const response = await fetch(`${API}/api/v1/jobs`);
@@ -64,7 +76,7 @@ export default function Home() {
     } catch { setApiOnline(false); }
   }, []);
 
-  useEffect(() => { void loadProfile(); void loadJobs(); }, [loadProfile, loadJobs]);
+  useEffect(() => { void loadProfile(); void loadJobs(); void loadApplications(); }, [loadProfile, loadJobs, loadApplications]);
 
   async function saveProfile(event: FormEvent<HTMLFormElement>) {
     event.preventDefault(); setMessage("");
@@ -90,6 +102,25 @@ export default function Home() {
       setJobDraft({ title: "", company: "", location: "Chennai", work_mode: "Hybrid", source: "manual", description: "", required_skills: "" });
       setMessage("Job saved to your local opportunity list."); await loadJobs();
     } catch (error) { setMessage(error instanceof Error ? error.message : "Could not save job."); }
+  }
+
+  async function trackJob(jobId: number) {
+    try {
+      const response = await fetch(`${API}/api/v1/applications`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ job_id: jobId, status: "saved" }) });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.detail || "Could not track this job");
+      setMessage("Job added to your application tracker."); await loadApplications();
+    } catch (error) { setMessage(error instanceof Error ? error.message : "Could not track job."); }
+  }
+
+  async function updateApplicationStatus(id: number, status: string) {
+    try {
+      const response = await fetch(`${API}/api/v1/applications/${id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status }) });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.detail || "Could not update tracker");
+      setApplications(current => current.map(item => item.id === id ? { ...item, status: data.status } : item));
+      setMessage("Application tracker updated.");
+    } catch (error) { setMessage(error instanceof Error ? error.message : "Could not update application."); }
   }
 
   async function scoreJob(jobId: number) {
@@ -170,7 +201,7 @@ export default function Home() {
           {jobs.length === 0 ? <div className="empty-state"><strong>No opportunities saved yet</strong><p>Add a job using the form. External job-source connectors are the next development phase.</p></div> :
             <div className="job-list">{jobs.map(job => <article className="job-card" key={job.id}><div className="job-card-top"><div><strong>{job.title}</strong><p>{job.company} · {job.location || "Location not specified"}</p></div><span className="job-source">{job.source}</span></div>
               <div className="skill-chips">{job.required_skills.map(skill => <span key={skill}>{skill}</span>)}</div>
-              <div className="job-actions"><span>{job.work_mode || "Work mode unspecified"}</span><button className="small-button" onClick={() => void scoreJob(job.id)}>Calculate match</button>{job.url && <a href={job.url} target="_blank" rel="noreferrer">Open listing ↗</a>}</div>
+              <div className="job-actions"><span>{job.work_mode || "Work mode unspecified"}</span><button className="small-button" onClick={() => void scoreJob(job.id)}>Calculate match</button><button className="small-button" onClick={() => void trackJob(job.id)}>Track job</button>{job.url && <a href={job.url} target="_blank" rel="noreferrer">Open listing ↗</a>}</div>
               {matches[job.id] && <div className="match-result"><div className="score"><strong>{matches[job.id].score}</strong><small>/ 100 match</small></div><div><strong>{matches[job.id].decision.replace("_"," ")}</strong><p>{matches[job.id].reasons.join(" · ")}</p><p>Matched: {matches[job.id].matched_skills.join(", ") || "None"} · Gaps: {matches[job.id].missing_skills.join(", ") || "None"}</p></div></div>}
             </article>)}</div>}
         </section><section className="panel"><span className="eyebrow">MANUAL JOB CAPTURE</span><h3>Add an opportunity</h3><p className="form-intro">Save a role you found on a job board or company career page.</p>
@@ -183,7 +214,12 @@ export default function Home() {
             <button className="submit-button" type="submit">Save opportunity</button></form>
         </section></div>}
 
-        {section === "applications" && <section className="panel empty-state"><span className="eyebrow">APPLICATION TRACKER</span><h3>Application tracking is next.</h3><p>Job records and matching are available. The next backend milestone will add application status, notes, follow-ups, and an audit trail. No application is submitted automatically.</p></section>}
+        {section === "applications" && <section className="panel"><div className="panel-heading"><div><span className="eyebrow">APPLICATION TRACKER</span><h3>Your tracked opportunities <span className="count">{applications.length}</span></h3></div><button className="small-button" onClick={() => void loadApplications()}>Refresh</button></div>
+          {applications.length === 0 ? <div className="empty-state"><strong>No tracked opportunities yet</strong><p>Open Job discovery and select “Track job” on an opportunity you want to follow.</p></div> :
+            <div className="job-list">{applications.map(item => <article className="job-card" key={item.id}><div className="job-card-top"><div><strong>{item.job_title}</strong><p>{item.company}</p></div><span className="job-source">#{item.id}</span></div>
+              <div className="application-controls"><label>Status<select value={item.status} onChange={event => void updateApplicationStatus(item.id,event.target.value)}>{["saved","shortlisted","preparing","applied","assessment","interview","offer","rejected","withdrawn"].map(status => <option key={status} value={status}>{status.replace("_"," ")}</option>)}</select></label><span className="application-note">Status changes are recorded locally. This does not submit an application.</span></div>
+            </article>)}</div>}
+        </section>}
         {section === "interviews" && <section className="panel empty-state"><span className="eyebrow">INTERVIEW CENTER</span><h3>Interview scheduling is not connected.</h3><p>Calendar integration and reminders will be added after the application tracker. Candidate participation in interviews and assessments remains manual.</p></section>}
         {section === "settings" && <section className="panel empty-state"><span className="eyebrow">LOCAL CONFIGURATION</span><h3>Integration controls</h3><p>API endpoint: <code>{API}</code></p><p>Browser automation, external account connections, and application submission remain disabled by default.</p></section>}
         <footer>CAREERPILOT AI <span>LOCAL-FIRST · BUILT FOR YOUR NEXT MOVE</span></footer>
