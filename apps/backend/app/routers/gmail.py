@@ -165,7 +165,9 @@ def search_gmail_messages(
             "id": message["id"], "thread_id": message.get("threadId"),
             "from": headers.get("from", ""), "to": headers.get("to", ""),
             "subject": headers.get("subject", "(no subject)"),
-            "date": headers.get("date", ""), "snippet": message.get("snippet", ""),\n            "message_id_header": headers.get("message-id", ""),\n            "references_header": headers.get("references", ""),
+            "date": headers.get("date", ""), "snippet": message.get("snippet", ""),
+            "message_id_header": headers.get("message-id", ""),
+            "references_header": headers.get("references", ""),
         })
     return {"items": items, "next_page_token": result.get("nextPageToken")}
 
