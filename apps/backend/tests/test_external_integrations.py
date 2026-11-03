@@ -15,7 +15,7 @@ def test_job_board_links_include_all_requested_providers():
             assert "ai-engineer-jobs-in-chennai" in item["url"]
         else:
             assert "AI+Engineer" in item["url"] or "AI%20Engineer" in item["url"]
-    assert all("Chennai" in item["url"] for item in result["items"])
+    assert all("chennai" in item["url"].casefold() for item in result["items"])
 
 
 def test_browser_field_mapping_uses_only_verified_profile_values():
