@@ -5,7 +5,7 @@ $frontend = Join-Path $root "apps\frontend"
 
 Write-Host "Setting up CareerPilot AI..." -ForegroundColor Cyan
 if (-not (Get-Command py -ErrorAction SilentlyContinue)) {
-    throw "Python launcher 'py' was not found. Install Python 3.11+ and retry."
+    throw "Python launcher 'py' was not found. Install Python 3.10+ and retry."
 }
 if (-not (Get-Command npm -ErrorAction SilentlyContinue)) {
     throw "npm was not found. Install Node.js 22+ and retry."
@@ -14,7 +14,7 @@ if (-not (Get-Command npm -ErrorAction SilentlyContinue)) {
 Push-Location $backend
 try {
     if (-not (Test-Path ".venv\Scripts\python.exe")) {
-        py -3.11 -m venv .venv
+        py -3.10 -m venv .venv
     }
     & ".venv\Scripts\python.exe" -m pip install --upgrade pip
     & ".venv\Scripts\python.exe" -m pip install -e ".[dev]"
