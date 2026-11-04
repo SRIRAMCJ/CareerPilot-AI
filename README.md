@@ -1,6 +1,6 @@
 # CareerPilot AI
 
-A local-first personal career workspace for discovering jobs, matching opportunities against a verified candidate profile, preparing application documents, tracking applications, and organizing interviews.
+A secure, cloud-ready personal career workspace for discovering jobs, matching opportunities against a verified candidate profile, preparing application documents, tracking applications, and organizing interviews.
 
 ## Current capabilities
 
@@ -24,20 +24,28 @@ Register recurring Gmail monitoring after configuring Gmail OAuth and starting t
 .\scripts\register-gmail-monitor.ps1 -IntervalMinutes 30
 ```
 
-## Quick start (Windows)
+## Cloud deployment (dashboard + remote MCP)
+
+Deploy the dashboard and authenticated remote MCP endpoint together on a Docker-capable Linux VM. The FastAPI backend stays on a private container network, the dashboard is protected by a login prompt, and the MCP endpoint requires a separate bearer token. Caddy provisions HTTPS automatically.
+
+See **[docs/CLOUD_DEPLOYMENT.md](docs/CLOUD_DEPLOYMENT.md)** for the complete VM deployment guide and [.env.production.example](.env.production.example) for the production configuration template.
+
+## Optional local development
+
+Local setup is intended for contributors who want to modify the code. It is not required to use the hosted dashboard or remote MCP deployment.
 
 ```powershell
 .\scripts\setup-local.ps1
 .\scripts\start-local.ps1
 ```
 
-Open `http://localhost:3000` and API docs at `http://127.0.0.1:8000/docs`. See [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md).
+Open `http://localhost:3000`. See [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md).
 
 ## AI assistant integration (MCP)
 
-CareerPilot includes a Python MCP server for Claude Desktop, Claude Code, Codex, Kimi Code, Antigravity, and other MCP-compatible clients. It exposes scoped tools for jobs, JD checks, matching, the application tracker, Gmail triage, interviews, and local application-material generation.
+CareerPilot includes both a local stdio MCP server and an authenticated remote Streamable HTTP MCP endpoint for compatible clients. It exposes scoped tools for jobs, JD checks, matching, the application tracker, Gmail triage, interviews, and local application-material generation.
 
-Install the MCP server on Windows after cloning and setting up the app:
+To connect an AI client to the hosted deployment, use the HTTPS MCP URL and bearer token described in [docs/CLOUD_DEPLOYMENT.md](docs/CLOUD_DEPLOYMENT.md). For local development, install the MCP server on Windows:
 
 ```powershell
 .\\scripts\\install-mcp.ps1
