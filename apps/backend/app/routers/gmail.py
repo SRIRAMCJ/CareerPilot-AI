@@ -32,7 +32,7 @@ class EmailDraft(BaseModel):
 def classify_recruiter_message(subject: str, snippet: str, sender: str = "") -> dict:
     text = " ".join((subject, snippet, sender)).casefold()
     patterns = [
-        ("offer", r"\b(offer letter|job offer|offering you|compensation package)\b"),
+        ("offer", r"\b(offer letter|job offer|offering you|offer you|pleased to offer|compensation package)\b"),
         ("rejection", r"\b(unfortunately|not moving forward|other candidates|regret to inform|not selected)\b"),
         ("interview", r"\b(interview|technical round|schedule a call|availability for a call)\b"),
         ("assessment", r"\b(assessment|coding test|online test|hackerrank|codility|take-home)\b"),
