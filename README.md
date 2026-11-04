@@ -33,6 +33,10 @@ Register recurring Gmail monitoring after configuring Gmail OAuth and starting t
 
 Open `http://localhost:3000` and API docs at `http://127.0.0.1:8000/docs`. See [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md).
 
+## AI assistant installation
+
+Use [docs/AI_ASSISTANT_INSTALLATION.md](docs/AI_ASSISTANT_INSTALLATION.md) for Windows clone/setup instructions and per-client guidance for Codex, ChatGPT Desktop, Claude Desktop, Claude Code, Kimi Code, Google Antigravity, and other MCP-compatible assistants. The guide clearly distinguishes using an AI coding assistant to work on the repository from connecting CareerPilot as an MCP tool server; the dedicated CareerPilot MCP server is planned but is not yet included.
+
 ## Integrations and privacy
 
 LinkedIn, Naukri, Indeed and Foundit are user-session search links, not claimed official API integrations. CareerPilot does not scrape private pages or bypass CAPTCHA, OTP, login restrictions or rate limits. Keep resumes, personal data, browser profiles, OAuth tokens and credentials outside Git. Make this repository private before adding real personal information.
