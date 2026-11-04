@@ -2,7 +2,7 @@
 
 CareerPilot AI is a local-first web application with a Next.js frontend and FastAPI backend. You can also open this repository in AI coding assistants to inspect, modify, test, and extend the project.
 
-> **Integration status:** The web application and API are implemented. A dedicated CareerPilot MCP server is **not yet included** in this repository. Therefore, the steps below distinguish (1) using an AI coding assistant to work on the cloned repository from (2) connecting CareerPilot as a set of callable tools inside an assistant. Do not configure a made-up CareerPilot MCP command or URL. The MCP connection steps become active after the server is implemented and published.
+> **Integration status:** CareerPilot includes a local Python MCP server. The MCP server is an adapter to the running FastAPI backend; it is not the same as opening the repository in a coding assistant. Follow [MCP_SERVER.md](MCP_SERVER.md) for exact installation and connection steps.
 
 ## 1. Clone and run CareerPilot
 
@@ -94,7 +94,7 @@ actions that still require my approval.
 2. Clone the repository using the common clone steps above.
 3. Claude Desktop chat is not the same as Claude Code: cloning a repository does not automatically give the chat app terminal or full project-editing access.
 4. For codebase editing, use Claude Code from the repository directory (above).
-5. To expose CareerPilot functions as tools in Claude Desktop, a CareerPilot MCP server must be available first. Once shipped, this guide will include its exact local-server or desktop-extension installation steps.
+5. Follow [MCP_SERVER.md](MCP_SERVER.md) to install the MCP package and merge the printed local stdio entry into Claude Desktop's configuration.
 
 Claude Desktop supports local MCP servers and desktop extensions. See the [official local MCP guide](https://support.claude.com/en/articles/10949351-getting-started-with-local-mcp-servers-on-claude-desktop).
 
@@ -104,7 +104,7 @@ Claude Desktop supports local MCP servers and desktop extensions. See the [offic
 2. Clone the repository on your computer.
 3. Use Codex for direct repository-level coding and terminal workflows.
 4. ChatGPT desktop by itself should not be treated as a local MCP host for this local-only API.
-5. To use CareerPilot tools in ChatGPT, the future MCP service must be reachable through a supported remote HTTPS connection or a secure tunnel. Availability of custom MCP apps and write actions depends on ChatGPT plan and workspace permissions.
+5. To use CareerPilot tools in ChatGPT, deploy the MCP server behind authenticated HTTPS or a secure authenticated tunnel. The local stdio configuration is not directly reachable by ChatGPT. Follow the ChatGPT section in [MCP_SERVER.md](MCP_SERVER.md).
 
 See [Connecting custom MCP servers in ChatGPT](https://help.openai.com/en/articles/12584461-connecting-custom-mcp-servers-in-chatgpt).
 
@@ -129,7 +129,7 @@ kimi
 4. Sign in using the `/login` command.
 5. Ask Kimi to inspect the repository documentation before making changes.
 
-Kimi Code supports project-level MCP configuration at `.kimi-code/mcp.json`. After the CareerPilot MCP server is released, its verified server entry can be added there. Do not add an entry until the server package or endpoint is published.
+Kimi Code supports project-level MCP configuration at `.kimi-code/mcp.json`. Use the local stdio server entry and actual Python executable path documented in [MCP_SERVER.md](MCP_SERVER.md).
 
 Official docs: [Kimi Code MCP configuration](https://www.kimi.com/code/docs/en/kimi-code-cli/customization/mcp.html).
 
@@ -139,7 +139,7 @@ Official docs: [Kimi Code MCP configuration](https://www.kimi.com/code/docs/en/k
 2. Clone the repository using the common clone steps.
 3. Open the `CareerPilot-AI` folder as the workspace in Antigravity.
 4. Ask the agent to read README.md and the docs before editing.
-5. Antigravity supports MCP servers. Once the CareerPilot MCP server is shipped, add its actual local command or remote endpoint in Antigravity's MCP server manager/configuration and restart or reload the server list.
+5. Add the local stdio server using the executable, arguments and environment documented in [MCP_SERVER.md](MCP_SERVER.md), then reload the MCP server list.
 
 Do not paste a placeholder CareerPilot endpoint. See [Google's MCP documentation for Antigravity](https://developers.google.com/knowledge/mcp?tab=google-antigravity) for the current client configuration flow.
 
@@ -153,9 +153,9 @@ Do not paste a placeholder CareerPilot endpoint. See [Google's MCP documentation
 
 MCP client configuration formats are not universal. Do not copy a configuration block from one client into another without checking that client's documentation.
 
-## 3. CareerPilot MCP integration (planned)
+## 3. CareerPilot MCP integration
 
-The intended architecture is:
+The architecture is:
 
 ```text
 ChatGPT / Codex / Claude / Kimi Code / Antigravity / other MCP clients
@@ -167,7 +167,7 @@ ChatGPT / Codex / Claude / Kimi Code / Antigravity / other MCP clients
              SQLite / job sources / Gmail / Playwright
 ```
 
-The MCP adapter is planned to expose scoped tools such as:
+The MCP adapter exposes scoped tools for:
 
 - Search and list discovered jobs
 - Verify job-description completeness and warnings
@@ -179,7 +179,7 @@ The MCP adapter is planned to expose scoped tools such as:
 
 Write actions must be permission-scoped. Sending an email or submitting an application must remain a separate user-approved action. The MCP layer must not bypass CAPTCHA, OTP, login controls, legal declarations, or website restrictions.
 
-### Planned connection modes
+### Connection modes
 
 - **Local stdio:** suitable for Claude Desktop, Claude Code, Kimi Code, and local MCP clients that can launch a local process.
 - **Remote Streamable HTTP:** suitable for clients that accept remote MCP endpoints. A secure tunnel or authenticated deployment is required to connect a local CareerPilot instance to a cloud-hosted assistant.
@@ -203,7 +203,7 @@ Write actions must be permission-scoped. Sending an email or submitting an appli
 | API docs do not open | Confirm FastAPI started at `127.0.0.1:8000` |
 | Agent cannot find the repository | Open the actual cloned folder, not its parent directory |
 | Agent cannot run PowerShell scripts | Check execution policy and local permissions |
-| MCP tools are missing | CareerPilot MCP server is not yet shipped; verify client support and server status after release |
+| MCP tools are missing | Check that the backend is running, the MCP package is installed, the client config uses the correct absolute Python path, and the client was restarted |
 | ChatGPT cannot reach local API | ChatGPT cannot directly call a loopback-only local server; use a supported secure tunnel or authenticated remote deployment |
 
 ## Official client references
