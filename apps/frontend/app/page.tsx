@@ -4,7 +4,7 @@ import Link from "next/link";
 
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 
-const API = process.env.NEXT_PUBLIC_API_BASE_URL || "http://127.0.0.1:8000";
+const API = process.env.NEXT_PUBLIC_API_BASE_URL ?? "";
 
 type Profile = {
   full_name: string; email: string; phone: string; location: string; headline: string;
