@@ -3,7 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "CareerPilot AI",
-  description: "Your local-first career command center.",
+  description: "Your secure career command center for jobs, applications, and interviews.",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
