@@ -1,0 +1,60 @@
+# CareerPilot AI production services.
+# Deploy this Blueprint from the repository root after the deployment PR is merged.
+services:
+  - type: web
+    name: careerpilot-api
+    runtime: docker
+    region: singapore
+    plan: starter
+    dockerfilePath: ./apps/backend/Dockerfile
+    dockerContext: .
+    healthCheckPath: /api/v1/health
+    disk:
+      name: careerpilot-data
+      mountPath: /var/data
+      sizeGB: 10
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: API_HOST
+        value: 0.0.0.0
+      - key: CAREERPILOT_DATABASE_PATH
+        value: /var/data/careerpilot.db
+      - key: CAREERPILOT_RESUME_DIR
+        value: /var/data/resumes
+      - key: CAREERPILOT_GENERATED_DIR
+        value: /var/data/generated
+      - key: GMAIL_TOKEN_PATH
+        value: /var/data/gmail-token.json
+      - key: GMAIL_ENABLED
+        value: "false"
+      - key: BROWSER_AUTOMATION_ENABLED
+        value: "false"
+      - key: APPLICATION_SUBMISSION_ENABLED
+        value: "false"
+      - key: AI_PROVIDER
+        value: none
+      - key: CAREERPILOT_PROXY_TOKEN
+        sync: false
+
+  - type: web
+    name: careerpilot-mcp
+    runtime: docker
+    region: singapore
+    plan: starter
+    dockerfilePath: ./apps/mcp-server/Dockerfile
+    dockerContext: .
+    envVars:
+      - key: CAREERPILOT_MCP_TRANSPORT
+        value: streamable-http
+      - key: CAREERPILOT_MCP_HOST
+        value: 0.0.0.0
+      - key: CAREERPILOT_API_URL
+        fromService:
+          type: web
+          name: careerpilot-api
+          property: hostport
+      - key: CAREERPILOT_PROXY_TOKEN
+        sync: false
+      - key: CAREERPILOT_MCP_AUTH_TOKEN
+        sync: false
