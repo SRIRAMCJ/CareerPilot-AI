@@ -24,11 +24,13 @@ Register recurring Gmail monitoring after configuring Gmail OAuth and starting t
 .\scripts\register-gmail-monitor.ps1 -IntervalMinutes 30
 ```
 
-## Cloud deployment (dashboard + remote MCP)
+## Cloud deployment
 
-Deploy the dashboard and authenticated remote MCP endpoint together on a Docker-capable Linux VM. The FastAPI backend stays on a private container network, the dashboard is protected by a login prompt, and the MCP endpoint requires a separate bearer token. Caddy provisions HTTPS automatically.
+**Recommended:** deploy the Next.js dashboard to Vercel and the FastAPI backend plus authenticated remote MCP server to Render. The existing SQLite database and resume/generated-document files are preserved on a Render persistent disk for this single-user deployment.
 
-See **[docs/CLOUD_DEPLOYMENT.md](docs/CLOUD_DEPLOYMENT.md)** for the complete VM deployment guide and [.env.production.example](.env.production.example) for the production configuration template.
+See [docs/VERCEL_RENDER_DEPLOYMENT.md](docs/VERCEL_RENDER_DEPLOYMENT.md) for the deployment walkthrough and [render.yaml](render.yaml) for the Render Blueprint.
+
+An alternative self-managed Docker Compose deployment on a Linux VM remains documented in [docs/CLOUD_DEPLOYMENT.md](docs/CLOUD_DEPLOYMENT.md).
 
 ## Optional local development
 
@@ -45,10 +47,10 @@ Open `http://localhost:3000`. See [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md).
 
 CareerPilot includes both a local stdio MCP server and an authenticated remote Streamable HTTP MCP endpoint for compatible clients. It exposes scoped tools for jobs, JD checks, matching, the application tracker, Gmail triage, interviews, and local application-material generation.
 
-To connect an AI client to the hosted deployment, use the HTTPS MCP URL and bearer token described in [docs/CLOUD_DEPLOYMENT.md](docs/CLOUD_DEPLOYMENT.md). For local development, install the MCP server on Windows:
+For the hosted deployment, use the MCP URL and bearer token described in [docs/VERCEL_RENDER_DEPLOYMENT.md](docs/VERCEL_RENDER_DEPLOYMENT.md). For local development, install the MCP server on Windows:
 
 ```powershell
-.\\scripts\\install-mcp.ps1
+.\scripts\install-mcp.ps1
 ```
 
 Keep the CareerPilot backend running at `http://127.0.0.1:8000`. Then configure your assistant using [docs/MCP_SERVER.md](docs/MCP_SERVER.md). ChatGPT custom MCP connections require an authenticated HTTPS deployment; the local stdio setup is not directly reachable by ChatGPT.
