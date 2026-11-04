@@ -10,6 +10,13 @@ function constantTimeEqual(left: string, right: string): boolean {
 }
 
 export function middleware(request: NextRequest) {
+  // Google must be able to return to the OAuth callback without the browser's
+  // Basic Auth challenge. The server-side API proxy still adds its secret token,
+  // and the backend validates Google's one-time OAuth state.
+  if (request.nextUrl.pathname === "/api/v1/gmail/auth/callback") {
+    return NextResponse.next();
+  }
+
   const username = process.env.DASHBOARD_USERNAME;
   const password = process.env.DASHBOARD_PASSWORD;
 
