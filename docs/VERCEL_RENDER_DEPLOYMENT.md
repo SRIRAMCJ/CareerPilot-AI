@@ -61,7 +61,7 @@ The OAuth callback path `/api/v1/gmail/auth/callback` is exempt from dashboard B
 - Backend health: `https://careerpilot-api.onrender.com/api/v1/health` (health only; other API routes require the proxy token)
 - MCP endpoint: `https://careerpilot-mcp.onrender.com/mcp`
 
-Test dashboard login, profile save/load, job discovery, resume upload/list/delete, DOCX generation/download, application tracking, and interviews. Test MCP with a remote Streamable HTTP client using the MCP URL and `Authorization: Bearer <CAREERPILOT_MCP_AUTH_TOKEN>`.
+Test dashboard login, profile save/load, job discovery, resume upload/list/delete (4 MB hosted upload limit), DOCX generation/download, application tracking, and interviews. Test MCP with a remote Streamable HTTP client using the MCP URL and `Authorization: Bearer <CAREERPILOT_MCP_AUTH_TOKEN>`.
 
 ## 5. Gmail OAuth (optional)
 
