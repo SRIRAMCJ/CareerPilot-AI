@@ -8,6 +8,8 @@ on:
       - "apps/frontend/**"
       - "apps/mcp-server/**"
       - "docker-compose.yml"
+      - "render.yaml"
+      - "render.yaml"
       - "deploy/**"
       - ".dockerignore"
       - ".github/workflows/deployment-build.yml"
