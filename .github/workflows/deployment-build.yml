@@ -1,0 +1,35 @@
+name: Deployment image builds
+
+on:
+  push:
+    branches: [main, "feat/**"]
+    paths:
+      - "apps/backend/**"
+      - "apps/frontend/**"
+      - "apps/mcp-server/**"
+      - "docker-compose.yml"
+      - "deploy/**"
+      - ".dockerignore"
+      - ".github/workflows/deployment-build.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "apps/backend/**"
+      - "apps/frontend/**"
+      - "apps/mcp-server/**"
+      - "docker-compose.yml"
+      - "deploy/**"
+      - ".dockerignore"
+      - ".github/workflows/deployment-build.yml"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build backend image
+        run: docker build -f apps/backend/Dockerfile -t careerpilot-backend:test .
+      - name: Build dashboard image
+        run: docker build -f apps/frontend/Dockerfile -t careerpilot-dashboard:test .
+      - name: Build remote MCP image
+        run: docker build -f apps/mcp-server/Dockerfile -t careerpilot-mcp:test .
