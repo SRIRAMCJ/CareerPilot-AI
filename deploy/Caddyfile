@@ -1,0 +1,12 @@
+{
+  email {$ACME_EMAIL}
+}
+
+{$CAREERPILOT_DOMAIN} {
+  encode zstd gzip
+
+  @mcp path /mcp /mcp/*
+  reverse_proxy @mcp mcp:8765
+
+  reverse_proxy frontend:3000
+}
