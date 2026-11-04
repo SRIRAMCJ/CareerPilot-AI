@@ -49,3 +49,41 @@ async def test_remote_mcp_accepts_valid_bearer_token() -> None:
     )
 
     assert called is True
+
+
+@pytest.mark.asyncio
+async def test_remote_mcp_rejects_invalid_bearer_token() -> None:
+    called = False
+
+    async def app(scope, receive, send):
+        nonlocal called
+        called = True
+
+    messages = []
+
+    async def send(message):
+        messages.append(message)
+
+    middleware = BearerTokenAuthMiddleware(app, "secret-token")
+    await middleware(
+        {"type": "http", "headers": [(b"authorization", b"Bearer wrong-token")]},
+        lambda: None,
+        send,
+    )
+
+    assert called is False
+    assert messages[0]["status"] == 401
+
+
+@pytest.mark.asyncio
+async def test_remote_mcp_forwards_non_http_asgi_lifespan_scope() -> None:
+    called = False
+
+    async def app(scope, receive, send):
+        nonlocal called
+        called = True
+
+    middleware = BearerTokenAuthMiddleware(app, "secret-token")
+    await middleware({"type": "lifespan"}, lambda: None, lambda message: None)
+
+    assert called is True
