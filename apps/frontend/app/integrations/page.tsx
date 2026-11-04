@@ -104,7 +104,8 @@ export default function IntegrationsPage() {
     setBusy(true);
     try {
       const data = await request(`/api/v1/browser/applications/${id}/prepare`, { method: "POST" });
-      setMessage(`Opened ${data.page_title}. Filled: ${data.filled_fields.join(", ") || "none"}. Review the visible browser and complete missing fields yourself.`);
+      const resume = data.resume_attachment;
+      setMessage(`Opened ${data.page_title}. Filled: ${data.filled_fields.join(", ") || "none"}. Resume: ${resume?.status || "not attached"} — ${resume?.filename || resume?.reason || "check the browser"}. Review all fields and the attached file in the visible browser.`);
     } catch (error) { setMessage(error instanceof Error ? error.message : "Could not prepare application."); }
     finally { setBusy(false); }
   }
