@@ -1,0 +1,105 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: apps/backend/Dockerfile
+    restart: unless-stopped
+    environment:
+      APP_ENV: production
+      APP_NAME: CareerPilot AI
+      API_HOST: 0.0.0.0
+      API_PORT: "8000"
+      FRONTEND_ORIGIN: https://${CAREERPILOT_DOMAIN:?Set CAREERPILOT_DOMAIN in .env.production}
+      CAREERPILOT_DATABASE_PATH: /var/data/careerpilot.db
+      CAREERPILOT_RESUME_DIR: /var/data/resumes
+      CAREERPILOT_GENERATED_DIR: /var/data/generated
+      GMAIL_TOKEN_PATH: /var/data/gmail-token.json
+      AI_PROVIDER: ${AI_PROVIDER:-none}
+      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-}
+      GMAIL_ENABLED: ${GMAIL_ENABLED:-false}
+      GMAIL_CLIENT_ID: ${GMAIL_CLIENT_ID:-}
+      GMAIL_CLIENT_SECRET: ${GMAIL_CLIENT_SECRET:-}
+      GMAIL_REDIRECT_URI: https://${CAREERPILOT_DOMAIN}/api/v1/gmail/auth/callback
+      BROWSER_AUTOMATION_ENABLED: "false"
+      APPLICATION_SUBMISSION_ENABLED: "false"
+      GOOGLE_CALENDAR_ENABLED: ${GOOGLE_CALENDAR_ENABLED:-false}
+    volumes:
+      - careerpilot_data:/var/data
+    expose:
+      - "8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/v1/health', timeout=4)"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    networks:
+      - internal
+
+  frontend:
+    build:
+      context: .
+      dockerfile: apps/frontend/Dockerfile
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      CAREERPILOT_API_INTERNAL_URL: http://backend:8000
+      DASHBOARD_USERNAME: ${DASHBOARD_USERNAME:-careerpilot}
+      DASHBOARD_PASSWORD: ${DASHBOARD_PASSWORD:?Set DASHBOARD_PASSWORD in .env.production}
+    depends_on:
+      backend:
+        condition: service_healthy
+    expose:
+      - "3000"
+    networks:
+      - internal
+
+  mcp:
+    build:
+      context: .
+      dockerfile: apps/mcp-server/Dockerfile
+    restart: unless-stopped
+    environment:
+      CAREERPILOT_API_URL: http://backend:8000
+      CAREERPILOT_MCP_TRANSPORT: streamable-http
+      CAREERPILOT_MCP_HOST: 0.0.0.0
+      CAREERPILOT_MCP_PORT: "8765"
+      PORT: "8765"
+      CAREERPILOT_MCP_AUTH_TOKEN: ${CAREERPILOT_MCP_AUTH_TOKEN:?Set CAREERPILOT_MCP_AUTH_TOKEN in .env.production}
+    depends_on:
+      backend:
+        condition: service_healthy
+    expose:
+      - "8765"
+    networks:
+      - internal
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    environment:
+      CAREERPILOT_DOMAIN: ${CAREERPILOT_DOMAIN:?Set CAREERPILOT_DOMAIN in .env.production}
+      ACME_EMAIL: ${ACME_EMAIL:?Set ACME_EMAIL in .env.production}
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - frontend
+      - mcp
+    networks:
+      - internal
+
+volumes:
+  careerpilot_data:
+  caddy_data:
+  caddy_config:
+
+networks:
+  internal:
+    driver: bridge
