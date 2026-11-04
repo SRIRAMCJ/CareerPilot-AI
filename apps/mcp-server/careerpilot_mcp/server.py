@@ -213,11 +213,33 @@ async def careerpilot_generate_application_materials(application_id: int) -> dic
 
 
 def main() -> None:
-    """Start the configured MCP transport (stdio by default)."""
+    """Start stdio locally or an authenticated Streamable HTTP server remotely."""
     transport = os.getenv("CAREERPILOT_MCP_TRANSPORT", "stdio").casefold()
-    if transport not in {"stdio", "streamable-http"}:
+    if transport == "stdio":
+        mcp.run(transport="stdio")
+        return
+    if transport != "streamable-http":
         raise SystemExit("CAREERPILOT_MCP_TRANSPORT must be 'stdio' or 'streamable-http'.")
-    mcp.run(transport=transport)
+
+    token = os.getenv("CAREERPILOT_MCP_AUTH_TOKEN", "")
+    if not token:
+        raise SystemExit(
+            "CAREERPILOT_MCP_AUTH_TOKEN is required for Streamable HTTP. "
+            "Refusing to start an unauthenticated remote MCP endpoint."
+        )
+
+    import uvicorn
+
+    from careerpilot_mcp.remote import BearerTokenAuthMiddleware
+
+    app = BearerTokenAuthMiddleware(mcp.streamable_http_app(), token)
+    uvicorn.run(
+        app,
+        host=os.getenv("CAREERPILOT_MCP_HOST", "0.0.0.0"),
+        port=int(os.getenv("PORT", os.getenv("CAREERPILOT_MCP_PORT", "8765"))),
+        proxy_headers=True,
+        forwarded_allow_ips="*",
+    )
 
 
 if __name__ == "__main__":
