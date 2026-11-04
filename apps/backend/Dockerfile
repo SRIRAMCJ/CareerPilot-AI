@@ -3,7 +3,8 @@ FROM python:3.12-slim
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
 
-WORKDIR /app
+# Preserve the repository-relative layout used by the backend settings loader.
+WORKDIR /app/CareerPilot-AI/apps/backend
 COPY apps/backend/pyproject.toml ./pyproject.toml
 COPY apps/backend/app ./app
 RUN pip install --no-cache-dir .
