@@ -143,21 +143,32 @@ Antigravity supports MCP servers. Open its MCP server configuration/manager and 
 
 The exact configuration UI/location may vary by Antigravity release. Restart or reload MCP servers, then verify the CareerPilot tools are available. Use Google's current Antigravity documentation rather than copying another client's config format.
 
-## ChatGPT custom MCP apps
+## Remote MCP deployment
 
-The local stdio configuration above does not connect ChatGPT to your PC. ChatGPT custom MCP connections require a reachable HTTPS MCP endpoint and availability depends on the user's plan/workspace and app settings.
+The remote Streamable HTTP transport is protected by a required bearer token. It refuses to start if `CAREERPILOT_MCP_AUTH_TOKEN` is missing. The token is checked before any MCP request is forwarded to the server.
 
-The server can be run with Streamable HTTP for a controlled deployment:
+For the recommended production deployment, follow [CLOUD_DEPLOYMENT.md](CLOUD_DEPLOYMENT.md):
 
-```powershell
-$env:CAREERPILOT_MCP_TRANSPORT = "streamable-http"
-$env:CAREERPILOT_MCP_HOST = "127.0.0.1"
-$env:CAREERPILOT_MCP_PORT = "8765"
-$env:CAREERPILOT_API_URL = "http://127.0.0.1:8000"
-& .\apps\mcp-server\.venv\Scripts\python.exe -m careerpilot_mcp.server
+- Public MCP endpoint: `https://YOUR_DOMAIN/mcp`
+- Required header: `Authorization: Bearer YOUR_MCP_TOKEN`
+- The dashboard and MCP server share the same private FastAPI backend and persistent data volume.
+- The backend itself is not published to the internet.
+- The dashboard is protected separately with HTTP Basic authentication.
+
+For a manually managed deployment, set these variables before starting the server:
+
+```bash
+export CAREERPILOT_MCP_TRANSPORT=streamable-http
+export CAREERPILOT_MCP_HOST=0.0.0.0
+export CAREERPILOT_MCP_PORT=8765
+export CAREERPILOT_API_URL=http://127.0.0.1:8000
+export CAREERPILOT_MCP_AUTH_TOKEN="$(openssl rand -hex 32)"
+careerpilot-mcp
 ```
 
-This binds to loopback and is **not directly reachable by ChatGPT**. To connect ChatGPT, deploy behind HTTPS with authentication and network controls, or use a secure tunnel that enforces authentication. Do not expose the unauthenticated MCP server or the local FastAPI API to the public internet. After deployment, use ChatGPT Settings → Apps/Connectors (wording and availability may vary) to add the remote MCP server.
+Place it behind an HTTPS reverse proxy and preserve the Authorization header. Do not expose port 8765 directly to the public internet. Store the bearer token as a server-side secret and configure it in the MCP client's remote-server authentication settings; never put it in prompts, source control, or browser JavaScript.
+
+ChatGPT custom MCP connections require a reachable HTTPS MCP endpoint and availability depends on the user's plan/workspace and app settings. When available, add `https://YOUR_DOMAIN/mcp` through ChatGPT's custom MCP app/connector settings and configure bearer authentication.
 
 ## Other MCP clients
 
