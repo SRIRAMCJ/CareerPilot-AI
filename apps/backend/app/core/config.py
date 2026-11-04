@@ -18,6 +18,7 @@ class Settings(BaseSettings):
     careerpilot_database_path: str | None = None
     careerpilot_resume_dir: str | None = None
     careerpilot_generated_dir: str | None = None
+    careerpilot_proxy_token: str = ""
     gmail_enabled: bool = False
     gmail_client_id: str = ""
     gmail_client_secret: str = ""
