@@ -10,6 +10,7 @@ services:
       API_HOST: 0.0.0.0
       API_PORT: "8000"
       FRONTEND_ORIGIN: https://${CAREERPILOT_DOMAIN:?Set CAREERPILOT_DOMAIN in .env.production}
+      CAREERPILOT_PROXY_TOKEN: ${CAREERPILOT_PROXY_TOKEN:?Set CAREERPILOT_PROXY_TOKEN in .env.production}
       CAREERPILOT_DATABASE_PATH: /var/data/careerpilot.db
       CAREERPILOT_RESUME_DIR: /var/data/resumes
       CAREERPILOT_GENERATED_DIR: /var/data/generated
@@ -44,7 +45,8 @@ services:
     restart: unless-stopped
     environment:
       NODE_ENV: production
-      CAREERPILOT_API_INTERNAL_URL: http://backend:8000
+      CAREERPILOT_API_URL: http://backend:8000
+      CAREERPILOT_PROXY_TOKEN: ${CAREERPILOT_PROXY_TOKEN:?Set CAREERPILOT_PROXY_TOKEN in .env.production}
       DASHBOARD_USERNAME: ${DASHBOARD_USERNAME:-careerpilot}
       DASHBOARD_PASSWORD: ${DASHBOARD_PASSWORD:?Set DASHBOARD_PASSWORD in .env.production}
     depends_on:
@@ -62,6 +64,7 @@ services:
     restart: unless-stopped
     environment:
       CAREERPILOT_API_URL: http://backend:8000
+      CAREERPILOT_PROXY_TOKEN: ${CAREERPILOT_PROXY_TOKEN:?Set CAREERPILOT_PROXY_TOKEN in .env.production}
       CAREERPILOT_MCP_TRANSPORT: streamable-http
       CAREERPILOT_MCP_HOST: 0.0.0.0
       CAREERPILOT_MCP_PORT: "8765"
