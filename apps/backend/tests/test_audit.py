@@ -12,9 +12,19 @@ def test_application_changes_are_audited(tmp_path, monkeypatch):
         "title": "AI Engineer", "company": "Example Labs", "source": "manual"
     }).json()
     application = client.post("/api/v1/applications", json={"job_id": job["id"]}).json()
-    client.patch(f"/api/v1/applications/{application['id']}", json={"status": "ready_to_submit"})
+
+    preparing = client.patch(
+        f"/api/v1/applications/{application['id']}", json={"status": "preparing"}
+    )
+    assert preparing.status_code == 200
+    ready = client.patch(
+        f"/api/v1/applications/{application['id']}", json={"status": "ready_to_submit"}
+    )
+    assert ready.status_code == 200
 
     events = client.get("/api/v1/audit/events").json()["items"]
     assert any(event["event_type"] == "application.created" for event in events)
-    assert any(event["event_type"] == "application.updated" for event in events)
-    assert events[0]["details"]["status"] == "ready_to_submit"
+    updates = [event for event in events if event["event_type"] == "application.updated"]
+    assert len(updates) == 2
+    assert updates[0]["details"]["from_status"] == "preparing"
+    assert updates[0]["details"]["to_status"] == "ready_to_submit"

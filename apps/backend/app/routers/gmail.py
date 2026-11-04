@@ -1,10 +1,12 @@
 import base64
+import re
 from email.mime.text import MIMEText
 from pathlib import Path
 
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
+from app.core.applications_database import list_applications
 from app.core.audit_database import record_event
 from app.core.config import get_settings
 
@@ -25,6 +27,29 @@ class EmailDraft(BaseModel):
     thread_id: str | None = Field(default=None, max_length=200)
     in_reply_to: str | None = Field(default=None, max_length=500)
     references: str | None = Field(default=None, max_length=1000)
+
+
+def classify_recruiter_message(subject: str, snippet: str, sender: str = "") -> dict:
+    text = " ".join((subject, snippet, sender)).casefold()
+    patterns = [
+        ("offer", r"\b(offer letter|job offer|offering you|offer you|pleased to offer|compensation package)\b"),
+        ("rejection", r"\b(unfortunately|not moving forward|other candidates|regret to inform|not selected)\b"),
+        ("interview", r"\b(interview|technical round|schedule a call|availability for a call)\b"),
+        ("assessment", r"\b(assessment|coding test|online test|hackerrank|codility|take-home)\b"),
+        ("application_update", r"\b(application received|application submitted|application status|under review)\b"),
+        ("recruiter_contact", r"\b(opportunity|job opening|recruiter|hiring|position)\b"),
+    ]
+    category = "other"
+    for label, pattern in patterns:
+        if re.search(pattern, text):
+            category = label
+            break
+    return {
+        "category": category,
+        "action_required": category in {"offer", "interview", "assessment", "recruiter_contact"},
+        "scheduling_hint": category in {"interview", "assessment"},
+        "classification_basis": "Keyword-based triage of sender, subject and Gmail snippet; verify the full email before acting.",
+    }
 
 
 def _settings():
@@ -151,9 +176,7 @@ def search_gmail_messages(
     max_results: int = Query(default=20, ge=1, le=50),
 ) -> dict:
     service = _service()
-    result = service.users().messages().list(
-        userId="me", q=q, maxResults=max_results
-    ).execute()
+    result = service.users().messages().list(userId="me", q=q, maxResults=max_results).execute()
     items = []
     for item in result.get("messages", []):
         message = service.users().messages().get(
@@ -170,6 +193,40 @@ def search_gmail_messages(
             "references_header": headers.get("references", ""),
         })
     return {"items": items, "next_page_token": result.get("nextPageToken")}
+
+
+@router.get("/triage")
+def triage_gmail_messages(
+    q: str = Query(default="newer_than:2d", max_length=500),
+    max_results: int = Query(default=50, ge=1, le=50),
+) -> dict:
+    """Read recent Gmail metadata and classify likely career-related updates."""
+    messages = search_gmail_messages(q=q, max_results=max_results)["items"]
+    applications = list_applications()
+    results = []
+    for message in messages:
+        classification = classify_recruiter_message(
+            message["subject"], message["snippet"], message["from"]
+        )
+        haystack = " ".join((message["subject"], message["snippet"], message["from"])).casefold()
+        matched = [
+            {"application_id": item["id"], "job_title": item["job_title"], "company": item["company"]}
+            for item in applications
+            if str(item.get("company") or "").casefold() in haystack
+            or str(item.get("job_title") or "").casefold() in haystack
+        ]
+        results.append({**message, **classification, "matched_applications": matched})
+    record_event("gmail.inbox_triaged", "gmail_inbox", None, {
+        "messages_checked": len(results),
+        "action_required": sum(1 for item in results if item["action_required"]),
+    })
+    return {
+        "checked": len(results),
+        "action_required": sum(1 for item in results if item["action_required"]),
+        "items": results,
+        "next_page_token": None,
+        "notice": "Classification is heuristic. Open the original email and confirm dates, deadlines and instructions before scheduling or replying.",
+    }
 
 
 def _raw_message(item: EmailDraft) -> str:

@@ -26,7 +26,7 @@ APPLICATION_SUBMISSION_ENABLED=false
 # BROWSER_PROFILE_DIR=C:/Users/YourName/AppData/Local/CareerPilot/browser-profile
 ```
 
-The dashboard route is `/integrations`. Enter a tracked application ID and choose **Open page and fill safe fields**. CareerPilot opens a visible persistent Chromium profile and fills only basic verified fields (name, email, phone, location, headline and summary). Review every field, upload the correct resume, and complete all declarations manually.
+The dashboard route is `/integrations`. Enter a tracked application ID and choose **Open page and fill safe fields**. CareerPilot opens a visible persistent Chromium profile and fills only basic verified fields (name, email, phone, location, headline and summary). It selects the most recently uploaded saved resume by default and attaches it only to a clearly labelled resume/CV file input. If a particular saved resume is required, call the prepare endpoint with `?resume_id={id}`. Review the attached filename and every field in the visible browser; complete all declarations manually. If the page has an ambiguous or unlabelled file input, CareerPilot will not attach a file.
 
 Submission is a separate, disabled-by-default action. After reviewing the live page, enable `APPLICATION_SUBMISSION_ENABLED=true` and type `SUBMIT APPLICATION` into the confirmation prompt. CareerPilot clicks only an unambiguous enabled button named Submit, Submit application, or Send application. It does not solve CAPTCHA, enter passwords/OTPs, answer identity/legal declarations, complete assessments, or claim that a click means the website accepted the application. Verify the result on the employer's website and update the tracker yourself.
 

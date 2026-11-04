@@ -70,7 +70,9 @@ The backend CORS origin defaults to `http://localhost:3000`.
 - Application tracker with status, notes, next actions, and follow-up dates.
 - Per-application DOCX resume and cover-letter draft generation from saved profile facts.
 - Interview and assessment scheduling with timezone-aware ICS export and reminder alarms.
-- Automated application submission, Gmail, and direct Google Calendar OAuth remain disabled/unimplemented.
+- Gmail OAuth inbox triage and optional recurring Windows Task Scheduler polling are available after user setup.
+- Browser-assisted application preparation can attach the latest saved PDF/DOCX resume to a clearly labelled resume/CV input; review it before submission.
+- Direct Google Calendar OAuth and automated calendar invitation parsing remain unimplemented.
 
 ## Optional daily job scan
 

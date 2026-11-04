@@ -3,7 +3,7 @@ import re
 from pathlib import Path
 from urllib.parse import urlparse
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel, ConfigDict, Field
 
 from app.core.applications_database import get_application
@@ -11,6 +11,7 @@ from app.core.audit_database import record_event
 from app.core.config import get_settings
 from app.core.database import read_profile
 from app.core.jobs_database import get_job
+from app.core.resume_database import get_resume_record, list_resume_records
 from app.core.submission_database import claim_submission_attempt, finish_submission_attempt, get_submission_attempt
 
 router = APIRouter(prefix="/api/v1/browser", tags=["browser-assisted applications"])
@@ -132,8 +133,38 @@ async def _fill_visible_fields(page, profile: dict) -> tuple[list[str], list[str
     return filled, skipped
 
 
+async def _attach_selected_resume(page, resume_id: int | None) -> dict:
+    records = list_resume_records()
+    selected = get_resume_record(resume_id) if resume_id is not None else (
+        get_resume_record(records[0]["id"]) if records else None
+    )
+    if selected is None:
+        return {"status": "not_attached", "reason": "No saved resume is available."}
+    path = Path(selected["stored_path"]).expanduser()
+    if path.suffix.casefold() not in {".pdf", ".docx"} or not path.is_file():
+        return {"status": "not_attached", "resume_id": selected["id"],
+                "reason": "The selected saved resume file is unavailable or has an unsupported type."}
+    inputs = page.locator('input[type="file"]')
+    for index in range(min(await inputs.count(), 10)):
+        field = inputs.nth(index)
+        descriptor = " ".join(filter(None, [
+            await field.get_attribute("name"), await field.get_attribute("id"),
+            await field.get_attribute("accept"), await field.get_attribute("aria-label"),
+        ])).casefold()
+        if "resume" not in descriptor and "cv" not in descriptor and "curriculum" not in descriptor:
+            continue
+        await field.set_input_files(str(path))
+        return {"status": "attached_for_review", "resume_id": selected["id"],
+                "filename": selected["filename"], "reason": "Attached to a clearly labelled resume/CV input. Verify it in the employer form."}
+    return {"status": "not_attached", "resume_id": selected["id"],
+            "filename": selected["filename"],
+            "reason": "No clearly labelled resume/CV upload field was found; no file was attached."}
+
+
 @router.post("/applications/{application_id}/prepare")
-async def prepare_application_form(application_id: int) -> dict:
+async def prepare_application_form(
+    application_id: int, resume_id: int | None = Query(default=None, gt=0)
+) -> dict:
     application = get_application(application_id)
     if not application:
         raise HTTPException(status_code=404, detail="Application tracker not found.")
@@ -148,14 +179,18 @@ async def prepare_application_form(application_id: int) -> dict:
         await page.close()
         raise HTTPException(status_code=502, detail="Could not open the job application page in the local browser.") from error
     filled, skipped = await _fill_visible_fields(page, profile)
+    resume_attachment = await _attach_selected_resume(page, resume_id)
     _PAGES[application_id] = page
     record_event("application.form_prepared", "application", application_id,
-                 {"fields_filled": len(filled), "fields_skipped": len(skipped)})
+                 {"fields_filled": len(filled), "fields_skipped": len(skipped),
+                  "resume_attachment": resume_attachment["status"],
+                  "resume_id": resume_attachment.get("resume_id")})
     return {
         "status": "form_prepared", "application_id": application_id,
         "page_title": await page.title(), "page_url": page.url,
-        "filled_fields": filled, "skipped_fields": skipped, "review_required": True,
-        "message": "Review every field in the visible browser. Attach the correct resume and complete declarations yourself.",
+        "filled_fields": filled, "skipped_fields": skipped,
+        "resume_attachment": resume_attachment, "review_required": True,
+        "message": "Review every field and the attached resume in the visible browser. Complete declarations yourself.",
     }
 
 
