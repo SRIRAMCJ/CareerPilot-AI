@@ -1,5 +1,8 @@
-from fastapi import FastAPI
+import hmac
+
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 from app.core.config import get_settings
 from app.routers.applications import router as applications_router
@@ -15,8 +18,7 @@ from app.routers.profile import router as profile_router
 from app.routers.resumes import router as resumes_router
 
 settings = get_settings()
-app = FastAPI(title=settings.app_name, version="0.2.0",
-              description="Local-first personal career workflow API.")
+app = FastAPI(title=settings.app_name, version="0.2.0", description="Local-first personal career workflow API.")
 
 for api_router in (
     profile_router, jobs_router, applications_router, audit_router, discovery_router,
@@ -24,6 +26,23 @@ for api_router in (
     browser_automation_router, gmail_router,
 ):
     app.include_router(api_router)
+
+
+@app.middleware("http")
+async def require_server_proxy_token(request: Request, call_next):
+    """Protect personal data APIs from direct public access in cloud deployments."""
+    if request.url.path == "/api/v1/health" or not request.url.path.startswith("/api/v1/"):
+        return await call_next(request)
+    expected = settings.careerpilot_proxy_token
+    if settings.app_env == "production" and not expected:
+        return JSONResponse({"detail": "API proxy authentication is not configured."}, status_code=503,
+                            headers={"Cache-Control": "no-store"})
+    supplied = request.headers.get("x-careerpilot-proxy-token", "")
+    if expected and not hmac.compare_digest(supplied, expected):
+        return JSONResponse({"detail": "Unauthorized API proxy request."}, status_code=401,
+                            headers={"Cache-Control": "no-store"})
+    return await call_next(request)
+
 
 app.add_middleware(
     CORSMiddleware, allow_origins=[settings.frontend_origin], allow_credentials=False,
