@@ -5,7 +5,7 @@
 - [x] FastAPI backend skeleton
 - [x] Next.js frontend skeleton
 - [x] Configuration and health endpoint
-- [x] Automated backend/frontend CI workflows (backend matrix, frontend lint and production build passing)
+- [x] Automated backend/frontend CI workflows
 - [x] Local setup documentation
 
 ## Phase 2 — Candidate profile
@@ -14,59 +14,49 @@
 - [x] PDF/DOCX resume upload, parsing, local storage, preview, and deletion
 - [ ] Verified-fact provenance and source-to-profile evidence mapping
 
-## Phase 3 — Job discovery
-- [x] Public-source adapter boundary
-- [x] Greenhouse, Lever, Ashby, and Workable public board connectors
-- [x] Job listing normalization and keyword extraction
-- [x] Source ID duplicate detection
-- [x] Manual job capture and local title/company/location search
-- [x] Persistent company-board watchlist and one-click multi-board scan
-- [x] Optional Windows Task Scheduler daily scan script
-- [ ] Broader employer-board catalog and adapter-specific access/terms review
+## Phase 3 — Job discovery and verification
+- [x] Public-source adapter boundary and Greenhouse, Lever, Ashby, Workable connectors
+- [x] Persistent company-board watchlist and daily scan script
+- [x] Manual job capture, duplicate detection, and local search
+- [x] JD completeness, HTTPS URL hygiene, provider-ID and freshness quality check
+- [ ] Live source re-fetch and comparison against the original employer page
+- [ ] Broader employer-board catalog and adapter-specific terms review
 
 ## Phase 4 — Matching
-- [x] Explainable weighted scoring
-- [x] Role, location, work-mode, and salary eligibility blockers
-- [x] Match reasons, matched skills, and missing-skill explanations
+- [x] Explainable weighted scoring and preference blockers
 - [ ] Experience-level and seniority eligibility rules
-- [ ] Advanced search filters and ranking controls
+- [ ] Semantic matching, advanced filters and ranking controls
 
 ## Phase 5 — Application preparation
-- [x] Per-application DOCX resume and cover-letter draft generation from saved profile facts
-- [x] Factuality guardrails: no invented employers, dates, qualifications, metrics, or achievements
-- [x] Candidate review before using generated materials
-- [x] Optional loopback-only Ollama cover-letter drafting
-- [ ] Resume tailoring based on full parsed source-resume sections
-- [ ] Application answer evidence mapping
+- [x] Per-application DOCX resume and cover-letter draft generation
+- [x] Factuality guardrails and candidate review
+- [ ] Resume tailoring from parsed source sections
+- [ ] Application answer evidence mapping and missing-field queue
 
 ## Phase 6 — Application workflow
-- [x] Application tracker with status, notes, next action, and follow-up date
-- [x] Basic profile field filling in visible browser and a typed, disabled-by-default submit confirmation
-- [x] Original job-page links and a ready-to-submit review status
-- [x] Local audit event log for profile, discovery, job, application, resume, materials, and interview actions
-- [x] Application status transition state machine with invalid-transition rejection
-- [x] Atomic one-attempt-per-application submission lock and attempt status endpoint
-- [x] Submission attempt audit events and unknown-outcome duplicate protection
-- [ ] Tamper-evident audit trail and employer confirmation evidence
-- [x] Visible local Playwright session support with a dedicated browser profile
-- [ ] Per-platform permitted application adapters
-- [ ] Human review gates for sensitive declarations
+- [x] Application tracker and status transition state machine
+- [x] Visible browser-assisted safe-field form filling
+- [x] Atomic one-attempt-per-application submission lock
+- [ ] Platform-specific permitted adapters and verified resume attachment workflow
+- [ ] Employer confirmation evidence and explicit approval queue UI
+- [ ] Manual recovery for abandoned or unknown submission attempts
 
 ## Phase 7 — Communication and scheduling
-- [x] Local interview and assessment scheduler
-- [x] Timezone-aware events and ICS calendar export with reminder alarms
-- [ ] Calendar conflict detection
-- [ ] Google Calendar OAuth
-- [x] Gmail OAuth with read, compose and send scopes (requires user credentials and consent)
-- [x] Recruiter inbox search, threaded reply drafts, and explicit send action
+- [x] Gmail OAuth, inbox search, threaded reply drafts and explicit send
+- [x] Heuristic recruiter/interview/assessment/offer/rejection triage
+- [x] Optional Windows Task Scheduler Gmail polling and local JSONL log
+- [x] Interview and assessment scheduler with ICS export
+- [ ] Persistent message deduplication and recruiter CRM
+- [ ] Calendar conflict detection and direct Google Calendar OAuth
+- [ ] Parse confirmed invitation details into a reviewable event draft
 
-## Phase 8 — Analytics and hardening
-- [ ] Application funnel metrics
-- [ ] Audit exports
-- [ ] Encrypted backup and restore
-- [ ] Security and recovery tests
+## Phase 8 — Autonomous orchestration and hardening
+- [ ] Unified agent planner, persistent task queue and approval checkpoints
+- [ ] End-to-end daily workflow and notifications
+- [ ] Application funnel analytics and audit exports
+- [ ] Encrypted backup, restore and security/recovery tests
 - [ ] Full end-to-end local runtime verification
 
 ## Release gates
 
-Real application submission must remain disabled until profile verification, deduplication, safety gates, audit logging, platform-permitted access, and submission confirmation tests pass. Never automate CAPTCHA bypass, legal declarations, fees, or identity-bound assessments/interviews. Real external integration tests must use explicitly authorized accounts and must not submit applications without the user's configured permission.
+Application submission and recruiter email sending remain explicit user-approved actions. Never bypass CAPTCHA, OTP, access restrictions, legal declarations, fees, or identity-bound assessments/interviews. A job quality score is not employer authentication. Verify the original listing and review all generated materials before external use.
