@@ -15,7 +15,10 @@ class CareerPilotAPIError(RuntimeError):
 
 
 def api_base_url() -> str:
-    return os.getenv("CAREERPILOT_API_URL", DEFAULT_API_URL).rstrip("/")
+    configured = os.getenv("CAREERPILOT_API_URL", DEFAULT_API_URL).rstrip("/")
+    if not configured.startswith(("http://", "https://")):
+        configured = f"http://{configured}"
+    return configured
 
 
 async def request(
@@ -28,9 +31,15 @@ async def request(
     """Call the configured CareerPilot API and return its JSON response."""
     url = f"{api_base_url()}{path}"
     timeout = httpx.Timeout(30.0, connect=5.0)
+    headers: dict[str, str] = {}
+    proxy_token = os.getenv("CAREERPILOT_PROXY_TOKEN", "")
+    if proxy_token:
+        headers["X-CareerPilot-Proxy-Token"] = proxy_token
     try:
         async with httpx.AsyncClient(timeout=timeout, follow_redirects=False) as client:
-            response = await client.request(method, url, params=params, json=payload)
+            response = await client.request(
+                method, url, params=params, json=payload, headers=headers
+            )
     except httpx.ConnectError as error:
         raise CareerPilotAPIError(
             "Cannot reach CareerPilot API. Start the local backend and verify "
