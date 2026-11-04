@@ -1,6 +1,6 @@
-# Cloud deployment: dashboard + remote MCP
+# Cloud deployment: Docker Compose VM alternative
 
-This deployment runs the CareerPilot dashboard and remote MCP endpoint on one Docker-capable Linux VM. It does not require Python, Node.js, or Git on your Windows workstation.
+This is the self-managed alternative to the recommended Vercel + Render deployment in [VERCEL_RENDER_DEPLOYMENT.md](VERCEL_RENDER_DEPLOYMENT.md). It runs the dashboard, backend, and remote MCP endpoint on one Docker-capable Linux VM. It does not require Python, Node.js, or Git on your Windows workstation.
 
 ## Production topology
 
@@ -12,7 +12,8 @@ Caddy (automatic TLS, ports 80/443)
   |------------------------------|
   v                              v
 Next.js dashboard                MCP Streamable HTTP
-  | /api/* proxy                 | Bearer token required
+  | /api/* server proxy          | Bearer token required
+  | shared proxy token           | shared API proxy token
   v                              v
 Private FastAPI backend <--------|
   |
@@ -20,7 +21,7 @@ Private FastAPI backend <--------|
   +-- resume and generated-document storage
 ```
 
-The backend has no published host port. Only Caddy is exposed publicly. The dashboard requires a username/password, and the MCP endpoint independently requires an Authorization bearer token. The API and data volume are shared by both experiences.
+The backend has no published host port. Only Caddy is exposed publicly. The dashboard requires a username/password, the backend personal-data API requires a separate shared proxy token, and the MCP endpoint independently requires a bearer token.
 
 ## VM and DNS requirements
 
@@ -32,7 +33,7 @@ The backend has no published host port. Only Caddy is exposed publicly. The dash
 
 ## Deploy
 
-After the cloud deployment changes are merged into `main`, run the following commands on the Linux VM (not on your Windows PC):
+After the deployment changes are merged into `main`, run the following commands on the Linux VM:
 
 ```bash
 git clone https://github.com/SRIRAMCJ/CareerPilot-AI.git
@@ -41,14 +42,15 @@ cp .env.production.example .env.production
 chmod 600 .env.production
 ```
 
-Edit `.env.production` and set your real domain and email. Generate two separate strong secrets:
+Edit `.env.production` and set your real domain and email. Generate three independent secrets:
 
 ```bash
 openssl rand -hex 32
 openssl rand -hex 32
+openssl rand -hex 32
 ```
 
-Use the first output for `DASHBOARD_PASSWORD` and the second for `CAREERPILOT_MCP_AUTH_TOKEN`. Do not reuse the same secret. Keep `.env.production` off Git and out of screenshots.
+Use one for `DASHBOARD_PASSWORD`, one for `CAREERPILOT_PROXY_TOKEN`, and one for `CAREERPILOT_MCP_AUTH_TOKEN`. Do not reuse values. The proxy token must be the same in the frontend, backend, and MCP services (Compose wires this automatically). Keep `.env.production` off Git and out of screenshots.
 
 Start the stack:
 
@@ -66,24 +68,23 @@ Caddy obtains and renews the TLS certificate automatically once DNS resolves and
 - MCP endpoint: `https://YOUR_DOMAIN/mcp` — Streamable HTTP, with `Authorization: Bearer YOUR_MCP_TOKEN`.
 - API: private Docker network only; do not publish it.
 
-In an MCP client that supports remote Streamable HTTP servers, add the MCP endpoint URL and configure the bearer token as its Authorization header. For ChatGPT, add it through the available custom MCP app/connector settings; feature availability and exact UI labels depend on the account/workspace. Never paste the token into a prompt or public repository.
+In an MCP client that supports remote Streamable HTTP servers, add the MCP endpoint URL and configure the bearer token as its Authorization header. Never paste the token into a prompt or public repository.
 
 ## Gmail OAuth (optional)
 
-When ready to enable Gmail:
 1. Configure the Google OAuth client with the exact redirect URI `https://YOUR_DOMAIN/api/v1/gmail/auth/callback`.
 2. Set `GMAIL_ENABLED=true`, `GMAIL_CLIENT_ID`, and `GMAIL_CLIENT_SECRET` in `.env.production`.
 3. Recreate the backend container: `docker compose --env-file .env.production up -d --force-recreate backend`.
 4. Complete the OAuth flow from the protected dashboard.
 
-The OAuth token file is stored on the persistent data volume. Keep the VM and volume access restricted.
+The OAuth token file is stored on the persistent data volume. The callback is exempt from dashboard Basic Auth so Google can return the user, but the backend proxy token and one-time OAuth state are still validated.
 
 ## Operations and backups
 
 - Update: `git pull && docker compose --env-file .env.production up -d --build`.
 - Inspect: `docker compose --env-file .env.production ps` and `docker compose --env-file .env.production logs -f`.
-- Back up: stop writes or use SQLite's online backup mechanism, and back up the `careerpilot_data` Docker volume. Back up Caddy's `caddy_data` volume to preserve certificate state.
-- Rotate the dashboard password and MCP token by updating `.env.production` and recreating the frontend/MCP services.
+- Back up: use SQLite's online backup mechanism and back up the `careerpilot_data` Docker volume. Back up Caddy's `caddy_data` volume to preserve certificate state.
+- Rotate all three secrets by updating `.env.production` and recreating the affected services.
 - Keep the VM patched and restrict SSH to trusted IPs.
 
 ## Current product scope and limitations
@@ -93,4 +94,3 @@ The OAuth token file is stored on the persistent data volume. Keep the VM and vo
 - Browser-assisted application submission remains disabled. Gmail sending and external job applications still require explicit human approval in the dashboard.
 - MCP does not expose email sending, job submission, arbitrary URL fetching, or account deletion.
 - Job descriptions and recruiter email contents are untrusted data. Review generated resume and cover-letter claims before use.
-- This Compose deployment is a self-managed VM setup. The VM provider, domain, DNS, OAuth credentials, and secret values must be supplied by the owner.
