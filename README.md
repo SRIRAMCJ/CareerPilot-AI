@@ -2,63 +2,41 @@
 
 A local-first personal career workspace for discovering jobs, matching opportunities against a verified candidate profile, preparing application documents, tracking applications, and organizing interviews.
 
-## Implemented in the current local-first release
+## Current capabilities
 
-- Candidate profile CRUD in SQLite, including roles, preferences, experience, education, projects, and certifications.
-- PDF/DOCX resume import, local storage, text extraction, and skill/contact hints for candidate review.
-- Public job discovery from Greenhouse, Lever, Ashby, and Workable company boards.
-- Persistent company-board watchlist, one-click multi-board scans, and optional Windows Task Scheduler daily scans.
-- Manual job capture, local search, duplicate detection, and explainable matching with location, work-mode, and salary eligibility blockers.
-- Application tracker with statuses, notes, next actions, follow-up dates, and original job-page links.
-- Per-application DOCX resume and cover-letter draft generation from saved profile facts.
-- Optional local Ollama cover-letter drafting; all other core workflows work without a model.
-- Interview and assessment scheduling with timezone-aware ICS export and calendar reminder alarms.
-- Windows setup and local launch scripts.
+- Candidate profile CRUD and PDF/DOCX resume import with local storage.
+- Public Greenhouse, Lever, Ashby and Workable company-board discovery.
+- Company-board watchlist, multi-board scans and optional Windows daily scans.
+- Explainable matching, application tracker and per-application DOCX material generation.
+- Visible Playwright form assistance for safe basic profile fields, with separate submission gate and duplicate-attempt lock.
+- Gmail OAuth inbox search, threaded reply drafts, explicit sending and recruiter-message triage.
+- Interview/assessment scheduling with timezone-aware ICS export.
+- JD quality check for completeness, HTTPS URL hygiene, source identifiers and listing freshness.
+- Optional recurring Windows Gmail triage task (default every 30 minutes).
 
-## Technology
+## JD verification and Gmail monitoring
 
-- Backend: Python 3.10+, FastAPI, Pydantic, SQLite, HTTPX.
-- Resume and document handling: pypdf and python-docx.
-- Frontend: Next.js 15, React 19, TypeScript.
-- Runtime: Windows 11 local-first workflow; backend binds to loopback by default.
+See [docs/AGENT_MONITORING.md](docs/AGENT_MONITORING.md). The JD check evaluates metadata quality; it does not authenticate an employer or guarantee the vacancy remains open. Gmail triage is heuristic and requires reviewing the original email.
+
+Register recurring Gmail monitoring after configuring Gmail OAuth and starting the local API:
+
+```powershell
+.\scripts\register-gmail-monitor.ps1 -IntervalMinutes 30
+```
 
 ## Quick start (Windows)
-
-From the repository root:
 
 ```powershell
 .\scripts\setup-local.ps1
 .\scripts\start-local.ps1
 ```
 
-Open the dashboard at `http://localhost:3000` and API documentation at `http://127.0.0.1:8000/docs`.
+Open `http://localhost:3000` and API docs at `http://127.0.0.1:8000/docs`. See [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md).
 
-For manual setup, troubleshooting, daily scanning, and tests, read [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md). Use [docs/ACCEPTANCE_TESTS.md](docs/ACCEPTANCE_TESTS.md) to verify the end-to-end local workflow.
+## Integrations and privacy
 
-## Integration status
-
-| Capability | Status | Notes |
-|---|---|---|
-| Greenhouse, Lever, Ashby, Workable | Implemented | Public company-board discovery; user supplies board slugs |
-| PDF/DOCX resume parsing | Partial | Selectable text only; scanned PDF OCR not included |
-| Matching and eligibility | Implemented | Deterministic and explainable; skill extraction is heuristic |
-| Application preparation | Partial | DOCX drafts from saved profile facts; candidate review required |
-| Application form assistance | Partial | Visible Playwright browser fills safe profile fields; explicit submit gate is disabled by default |
-| LinkedIn, Naukri, Indeed, Foundit | Search links | User-session search links; no private-page scraping or unrestricted API assumption |
-| Gmail and recruiter email | Implemented, requires setup | OAuth inbox search, drafts and explicitly confirmed sending |
-| Google Calendar | Partial | ICS export supported; direct Calendar OAuth/sync not implemented |
-| Local LLM | Partial | Optional loopback-only Ollama cover-letter drafts; deterministic workflows work without a model |
-
-## Privacy and safety
-
-Candidate profiles, resumes, extracted resume text, generated documents, and databases are stored locally and excluded from Git. Never commit real candidate data, credentials, OAuth tokens, browser profiles, or application evidence. Make the repository private before adding any private project configuration or personal data.
-
-CareerPilot does not bypass CAPTCHA, anti-bot protections, login restrictions, or rate limits. It does not invent candidate qualifications, submit legal declarations, pay application fees, or complete identity-bound assessments/interviews. Generated documents must be reviewed before use.
-
-## External integrations
-
-See [docs/EXTERNAL_INTEGRATIONS.md](docs/EXTERNAL_INTEGRATIONS.md) for Gmail OAuth setup, job-board search links, browser-assisted form preparation, and submission safety controls. The dashboard is available at `/integrations`.
+LinkedIn, Naukri, Indeed and Foundit are user-session search links, not claimed official API integrations. CareerPilot does not scrape private pages or bypass CAPTCHA, OTP, login restrictions or rate limits. Keep resumes, personal data, browser profiles, OAuth tokens and credentials outside Git. Make this repository private before adding real personal information.
 
 ## Roadmap
 
-See [docs/ROADMAP.md](docs/ROADMAP.md) for completed milestones and remaining work. In particular, official authenticated job-board APIs and per-platform application adapters, fully autonomous application submission, direct Google Calendar sync, formal application state machine, encrypted backup, and full end-to-end runtime verification remain release work.
+See [docs/ROADMAP.md](docs/ROADMAP.md) for completed milestones and remaining work.
