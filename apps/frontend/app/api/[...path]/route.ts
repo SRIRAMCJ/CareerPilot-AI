@@ -21,6 +21,16 @@ async function proxy(request: NextRequest, context: RouteContext): Promise<Respo
     );
   }
 
+  // Vercel Functions enforce a 4.5 MB request-body ceiling. Reject oversized
+  // multipart uploads early with a useful message instead of forwarding them.
+  const contentLength = Number(request.headers.get("content-length") || "0");
+  if (contentLength > 4_400_000) {
+    return NextResponse.json(
+      { detail: "Hosted resume uploads must be 4 MB or smaller. Larger direct-to-storage uploads are planned." },
+      { status: 413, headers: { "Cache-Control": "no-store" } },
+    );
+  }
+
   const { path } = await context.params;
   const upstreamUrl = new URL(
     `/api/${path.map((segment) => encodeURIComponent(segment)).join("/")}`,
