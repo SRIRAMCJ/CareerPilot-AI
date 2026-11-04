@@ -52,6 +52,8 @@
 - [ ] Parse confirmed invitation details into a reviewable event draft
 
 ## Phase 8 — Autonomous orchestration and hardening
+- [x] Local MCP server exposing scoped CareerPilot tools over stdio and optional Streamable HTTP
+- [x] MCP client setup documentation and Windows installation script
 - [ ] Unified agent planner, persistent task queue and approval checkpoints
 - [ ] End-to-end daily workflow and notifications
 - [ ] Application funnel analytics and audit exports

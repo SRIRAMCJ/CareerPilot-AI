@@ -33,9 +33,19 @@ Register recurring Gmail monitoring after configuring Gmail OAuth and starting t
 
 Open `http://localhost:3000` and API docs at `http://127.0.0.1:8000/docs`. See [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md).
 
-## AI assistant installation
+## AI assistant integration (MCP)
 
-Use [docs/AI_ASSISTANT_INSTALLATION.md](docs/AI_ASSISTANT_INSTALLATION.md) for Windows clone/setup instructions and per-client guidance for Codex, ChatGPT Desktop, Claude Desktop, Claude Code, Kimi Code, Google Antigravity, and other MCP-compatible assistants. The guide clearly distinguishes using an AI coding assistant to work on the repository from connecting CareerPilot as an MCP tool server; the dedicated CareerPilot MCP server is planned but is not yet included.
+CareerPilot includes a Python MCP server for Claude Desktop, Claude Code, Codex, Kimi Code, Antigravity, and other MCP-compatible clients. It exposes scoped tools for jobs, JD checks, matching, the application tracker, Gmail triage, interviews, and local application-material generation.
+
+Install the MCP server on Windows after cloning and setting up the app:
+
+```powershell
+.\\scripts\\install-mcp.ps1
+```
+
+Keep the CareerPilot backend running at `http://127.0.0.1:8000`. Then configure your assistant using [docs/MCP_SERVER.md](docs/MCP_SERVER.md). ChatGPT custom MCP connections require an authenticated HTTPS deployment; the local stdio setup is not directly reachable by ChatGPT.
+
+See [docs/AI_ASSISTANT_INSTALLATION.md](docs/AI_ASSISTANT_INSTALLATION.md) for client installation and repository workspace instructions.
 
 ## Integrations and privacy
 
