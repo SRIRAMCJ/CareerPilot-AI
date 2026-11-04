@@ -37,7 +37,8 @@
 - [x] Application tracker and status transition state machine
 - [x] Visible browser-assisted safe-field form filling
 - [x] Atomic one-attempt-per-application submission lock
-- [ ] Platform-specific permitted adapters and verified resume attachment workflow
+- [x] Latest saved PDF/DOCX resume attached to a clearly labelled resume/CV input during browser preparation
+- [ ] Platform-specific permitted application adapters
 - [ ] Employer confirmation evidence and explicit approval queue UI
 - [ ] Manual recovery for abandoned or unknown submission attempts
 
