@@ -5,6 +5,7 @@ from app.core.database import read_profile
 from app.core.jobs_database import create_job, get_job, list_jobs
 from app.schemas.job import JobListingCreate
 from app.schemas.profile import CandidateProfile
+from app.services.jd_verification import verify_job_description
 from app.services.matching import score_job
 
 router = APIRouter(prefix="/api/v1/jobs", tags=["jobs"])
@@ -35,6 +36,20 @@ def get_one_job(job_id: int) -> dict:
     if job is None:
         raise HTTPException(status_code=404, detail="Job not found.")
     return job
+
+
+@router.get("/{job_id}/verify")
+def verify_one_job(job_id: int) -> dict:
+    job = get_job(job_id)
+    if job is None:
+        raise HTTPException(status_code=404, detail="Job not found.")
+    result = verify_job_description(job)
+    record_event("job.jd_quality_checked", "job_listing", job_id, {
+        "status": result["status"],
+        "completeness_score": result["completeness_score"],
+        "missing_fields": result["missing_fields"],
+    })
+    return result
 
 
 @router.get("/{job_id}/match")
