@@ -14,7 +14,7 @@ class BearerTokenAuthMiddleware:
         if not token:
             raise ValueError("A non-empty MCP bearer token is required.")
         self.app = app
-        self.expected = f"Bearer {token}".encode("utf-8")
+        self.expected = f"Bearer {token}".encode()
 
     async def __call__(self, scope: dict[str, Any], receive: Any, send: Any) -> None:
         if scope.get("type") != "http":
